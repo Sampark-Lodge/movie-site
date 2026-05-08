@@ -15,19 +15,18 @@
     --text: #e8e8f0;
     --muted: #6b6b85;
     --accent: #e8214a;
-    --col-gap: 16px;
-    --row-gap: 12px;
-    --label-h: 30px;
-    --header-h: 60px;
-    --main-pad-v: 8px;
-    --card-w: 140px;
-    --card-h: 210px;
-    --card-w-lg: 200px;
+    --col-gap: 14px;
+    --row-gap: 28px;
+    --label-h: 32px;
+    --header-h: 64px;
+    --cat-h: 44px;
+    --card-w: 170px;
+    --card-h: 255px;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{
-    width:100%;height:100%;
-    overflow:hidden;
+    width:100%;min-height:100vh;
+    overflow-y:auto;overflow-x:hidden;
     background:var(--bg);
     color:var(--text);
     font-family:'Inter',sans-serif;
@@ -38,200 +37,97 @@
     pointer-events:none;z-index:100;
   }
 
-  /* HEADER */
+  /* HEADER - centered logo */
   header{
-    position:fixed;top:0;left:0;right:0;height:60px;
-    display:flex;align-items:center;
+    position:sticky;top:0;left:0;right:0;height:var(--header-h);
+    display:flex;align-items:center;justify-content:center;
     padding:0 32px;z-index:50;
-    background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,rgba(10,10,15,0) 100%);
+    background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,rgba(10,10,15,0.85) 100%);
+    backdrop-filter:blur(8px);
   }
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
   .logo-l{color:var(--bg);background:var(--gold);padding:2px 10px 1px;border-radius:3px;}
   .logo-r{color:#fff;margin-left:3px;}
   .logo-r span{color:var(--accent);}
 
-  /* YOUTUBE CHANNEL BAR (gptoktha) */
-  .yt-bar{
-    position:fixed;top:60px;left:0;right:0;height:130px;z-index:40;
-    background:rgba(10,10,15,0.95);
-    border-bottom:1px solid rgba(245,197,24,0.1);
-    display:flex;align-items:center;padding:0 32px;gap:16px;
-    overflow:hidden;
-  }
-  .yt-bar .yt-label{
-    font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-    color:var(--gold-dim);flex-shrink:0;white-space:nowrap;align-self:flex-start;margin-top:14px;
-  }
-  .yt-bar .yt-label .yt-icon{color:#ff0000;margin-right:4px;}
-  .yt-bar .yt-scroll{
-    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
-    padding:4px 0;flex:1;align-items:center;
+  /* CATEGORY BAR - horizontally scrollable pill tabs */
+  .cat-bar{
+    position:sticky;top:var(--header-h);left:0;right:0;
+    height:var(--cat-h);z-index:45;
+    display:flex;align-items:center;
+    padding:0 32px;gap:8px;
+    background:var(--bg);
+    border-bottom:1px solid rgba(255,255,255,0.04);
+    overflow-x:auto;overflow-y:hidden;
     scrollbar-width:none;
   }
-  .yt-bar .yt-scroll::-webkit-scrollbar{display:none;}
-  .yt-bar .yt-vid{
-    flex-shrink:0;width:200px;height:113px;border-radius:6px;overflow:hidden;
-    position:relative;background:#000;
-    transition:transform 0.2s,box-shadow 0.2s;
-    cursor:pointer;
-  }
-  .yt-bar .yt-vid:hover{transform:scale(1.04);box-shadow:0 0 16px rgba(255,0,0,0.3);}
-  .yt-bar .yt-vid iframe{
-    width:200px;height:113px;border:none;display:block;pointer-events:none;
-  }
-  .yt-bar .yt-vid img{
-    width:200px;height:113px;object-fit:cover;display:block;
-  }
-  .yt-bar .yt-vid .mute-badge{
-    position:absolute;top:4px;right:4px;
-    background:rgba(0,0,0,0.75);color:#fff;
-    font-size:8px;padding:2px 6px;border-radius:3px;
-    pointer-events:none;
-  }
-  .yt-bar .yt-vid .channel-label{
-    position:absolute;bottom:0;left:0;right:0;
-    background:linear-gradient(0deg,rgba(0,0,0,0.85),transparent);
-    padding:6px 8px 4px;pointer-events:none;
-  }
-  .yt-bar .yt-vid .channel-label span{
-    font-size:8px;color:rgba(255,255,255,0.7);letter-spacing:0.5px;
-  }
-  .yt-bar .play-indicator{
-    position:absolute;top:4px;left:4px;
-    background:rgba(255,0,0,0.9);color:#fff;
-    font-size:7px;padding:2px 6px;border-radius:3px;
-    pointer-events:none;
-    letter-spacing:0.5px;
-  }
-
-  /* CATEGORY TABS */
-  .cat-tabs{
-    position:fixed;top:190px;left:0;right:0;height:36px;z-index:39;
-    display:flex;align-items:center;gap:8px;
-    padding:0 32px;
-    background:linear-gradient(180deg,rgba(10,10,15,0.95),rgba(10,10,15,0));
-  }
+  .cat-bar::-webkit-scrollbar{display:none;}
   .cat-tab{
-    font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    flex-shrink:0;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
     color:var(--muted);background:transparent;
     border:1px solid rgba(255,255,255,0.08);border-radius:20px;
-    padding:4px 16px;cursor:pointer;
+    padding:5px 18px;cursor:pointer;
     transition:all 0.2s;white-space:nowrap;
   }
-  .cat-tab:hover,.cat-tab.active{color:var(--gold);border-color:var(--gold-dim);background:rgba(245,197,24,0.08);}
+  .cat-tab:hover{color:var(--gold);border-color:var(--gold-dim);}
   .cat-tab.active{background:var(--gold);color:#000;border-color:var(--gold);}
 
-  /* MAIN */
+  /* MAIN CONTENT - streaming rows */
   main{
-    position:fixed;
-    top:226px;bottom:0;left:0;right:0;
-    overflow:hidden;
-    padding:8px 0 0 32px;
+    padding:24px 32px 48px;
     display:flex;flex-direction:column;gap:var(--row-gap);
   }
 
-  /* ROW */
-  .row-section{flex-shrink:0;}
+  /* ROW SECTION */
+  .row{
+    position:relative;
+  }
   .row-label{
-    font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-    color:var(--muted);height:var(--label-h);
-    display:flex;align-items:center;gap:10px;padding-right:32px;
+    font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--text);margin-bottom:12px;
   }
-  .row-label .count{
-    font-size:10px;font-weight:400;color:rgba(255,255,255,0.15);
-    font-family:monospace;
+  .row-track-wrap{position:relative;}
+  .row-track-wrap::before,
+  .row-track-wrap::after{
+    content:'';position:absolute;top:0;bottom:8px;width:48px;z-index:5;
+    pointer-events:none;
   }
-  .row-label .arr-btn{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:22px;height:22px;border-radius:50%;
-    border:1px solid rgba(255,255,255,0.1);
-    background:transparent;color:var(--muted);
-    cursor:pointer;font-size:10px;transition:all 0.2s;
-    margin-left:4px;
-  }
-  .row-label .arr-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,0.1);}
-  .row-scroll{
+  .row-track-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent);z-index:5;}
+  .row-track-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent);z-index:5;}
+  .row-track{
     display:flex;gap:var(--col-gap);
     overflow-x:auto;overflow-y:hidden;
-    padding-bottom:6px;padding-right:32px;
-    scroll-snap-type:x mandatory;
-    scrollbar-width:thin;
-    scrollbar-color:rgba(245,197,24,0.3) transparent;
+    padding-bottom:8px;
+    scrollbar-width:none;cursor:grab;
   }
-  .row-scroll::-webkit-scrollbar{height:3px;}
-  .row-scroll::-webkit-scrollbar-track{background:transparent;}
-  .row-scroll::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px;}
+  .row-track::-webkit-scrollbar{display:none;}
+  .row-track:active{cursor:grabbing;}
 
-  /* CARD */
+  /* MOVIE CARD */
   .card{
     flex-shrink:0;width:var(--card-w);height:var(--card-h);
-    border-radius:10px;overflow:hidden;position:relative;cursor:pointer;
+    border-radius:8px;overflow:hidden;position:relative;cursor:pointer;
     scroll-snap-align:start;
-    transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;
-    background:var(--card);
+    transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+               box-shadow 0.3s,
+               z-index 0s;
+    will-change:transform;
   }
   .card:hover{
-    transform:translateY(-8px) scale(1.05);
-    box-shadow:0 24px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(245,197,24,0.25);
+    transform:translateY(-12px) scale(1.06);
+    box-shadow:0 32px 64px rgba(0,0,0,0.7);
+    z-index:10;
   }
-  .card img{width:100%;height:100%;object-fit:cover;display:block;transition:filter 0.3s;}
-  .card:hover img{filter:brightness(0.45) saturate(0.8);}
-  .card-overlay{
+  .card img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card-info{
     position:absolute;bottom:0;left:0;right:0;
-    background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.4) 50%,transparent 100%);
-    padding:14px 12px 10px;
+    background:linear-gradient(0deg,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0) 60%);
+    padding:14px 12px 12px;
   }
-  .card-title{font-size:12px;font-weight:700;line-height:1.3;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .card-meta{display:flex;align-items:center;gap:6px;margin-top:5px;}
-  .card-meta .star{color:var(--gold);font-size:10px;}
-  .card-meta .rating{font-size:11px;font-weight:700;color:var(--gold);}
-  .card-meta .year{font-size:10px;color:var(--muted);margin-left:auto;}
-  .card-rank{
-    position:absolute;top:8px;left:8px;
-    width:24px;height:24px;border-radius:50%;
-    background:var(--gold);color:#000;
-    font-size:11px;font-weight:800;
-    display:flex;align-items:center;justify-content:center;
-    z-index:2;
-  }
-  .card-hover-info{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;
-    opacity:0;transition:opacity 0.3s;padding:12px;
-  }
-  .card:hover .card-hover-info{opacity:1;}
-  .card-hover-info .play-btn{
-    width:44px;height:44px;border-radius:50%;
-    background:var(--gold);display:flex;align-items:center;justify-content:center;
-    color:#000;font-size:16px;transition:transform 0.2s;
-  }
-  .card-hover-info .play-btn:hover{transform:scale(1.15);}
-  .card-hover-info .card-genre{
-    font-size:9px;color:rgba(255,255,255,0.7);
-    letter-spacing:1px;text-transform:uppercase;text-align:center;
-  }
-  .card .user-rating{
-    position:absolute;bottom:50px;right:8px;
-    display:flex;flex-direction:column;align-items:center;gap:2px;
-    opacity:0;transition:opacity 0.3s;
-  }
-  .card:hover .user-rating{opacity:1;}
-  .user-rating .star-btn{
-    background:none;border:none;color:rgba(255,255,255,0.3);
-    cursor:pointer;font-size:14px;transition:color 0.2s;padding:1px;
-    line-height:1;
-  }
-  .user-rating .star-btn:hover,.user-rating .star-btn.active{color:var(--gold);}
-
-  /* BADGES */
-  .badge{
-    display:inline-block;font-size:8px;font-weight:700;letter-spacing:1px;
-    text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-right:8px;
-  }
-  .badge-new{background:var(--accent);color:#fff;}
-  .badge-top{background:var(--gold);color:#000;}
-  .badge-hot{background:#ff6b35;color:#fff;}
-  .badge-classic{background:#2a6f97;color:#fff;}
+  .card-title{font-size:11px;font-weight:700;color:#fff;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-rating{display:flex;align-items:center;gap:4px;margin-top:5px;}
+  .card-rating .star{color:var(--gold);font-size:10px;}
+  .card-rating span{font-size:11px;font-weight:700;color:var(--gold);}
 
   /* MODAL */
   .modal-overlay{
@@ -296,27 +192,8 @@
   </span>
 </header>
 
-<!-- YouTube Channel Bar - @gptoktha -->
-<div class="yt-bar">
-  <span class="yt-label"><span class="yt-icon">▶</span> gptoktha</span>
-  <div class="yt-scroll" id="ytScroll">
-    <div class="yt-vid" id="ytVidPlayer"><div class="mute-badge">🔇 AUTO</div><div class="play-indicator">LIVE</div><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="KvnXPKdwW-o"><img src="https://i3.ytimg.com/vi/KvnXPKdwW-o/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="z4ro8pJgKgc"><img src="https://i3.ytimg.com/vi/z4ro8pJgKgc/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="x6-Ewhf9m3Q"><img src="https://i3.ytimg.com/vi/x6-Ewhf9m3Q/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="byJPZg9dg6I"><img src="https://i3.ytimg.com/vi/byJPZg9dg6I/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="Shep8cRIqRo"><img src="https://i3.ytimg.com/vi/Shep8cRIqRo/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="awybDZ__a0Q"><img src="https://i3.ytimg.com/vi/awybDZ__a0Q/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="SFTryjtLQyU"><img src="https://i3.ytimg.com/vi/SFTryjtLQyU/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="-Gc1aSKtnUA"><img src="https://i3.ytimg.com/vi/-Gc1aSKtnUA/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="ckdgebBfjRs"><img src="https://i3.ytimg.com/vi/ckdgebBfjRs/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="gf3oWBuA1pM"><img src="https://i3.ytimg.com/vi/gf3oWBuA1pM/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-    <div class="yt-vid yt-thumb" data-vid="V2txKZUhnyA"><img src="https://i3.ytimg.com/vi/V2txKZUhnyA/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
-  </div>
-</div>
-
-<!-- Category Tabs -->
-<div class="cat-tabs" id="catTabs">
+<!-- Category Bar -->
+<div class="cat-bar" id="catTabs">
   <button class="cat-tab active" data-cat="all">All</button>
   <button class="cat-tab" data-cat="action">Action</button>
   <button class="cat-tab" data-cat="drama">Drama</button>
@@ -327,6 +204,9 @@
   <button class="cat-tab" data-cat="comedy">Comedy</button>
   <button class="cat-tab" data-cat="animation">Animation</button>
   <button class="cat-tab" data-cat="mystery">Mystery</button>
+  <button class="cat-tab" data-cat="western">Western</button>
+  <button class="cat-tab" data-cat="war">War</button>
+  <button class="cat-tab" data-cat="musical">Musical</button>
 </div>
 
 <main id="main"></main>
@@ -948,24 +828,39 @@ const UNIQUE_MOVIES = MOVIES.filter(m => {
 
 console.log(`Total unique movies: ${UNIQUE_MOVIES.length}`);
 
-// ─── ROWS ───
-const GENRE_MAP = {
-  'all':'All','action':'Action','drama':'Drama','sci-fi':'Sci-Fi',
-  'horror':'Horror','thriller':'Thriller','crime':'Crime',
-  'comedy':'Comedy','animation':'Animation','mystery':'Mystery'
-};
-
+// ─── ROW DEFINITIONS ───
 const ROW_DEFS = [
-  { label:'Top Rated', icon:'★', filter: m => m[2] >= 9.0, badge:'top', cat:'all' },
-  { label:'New Releases 2025', icon:'●', filter: m => m[1] >= 2025, badge:'new', cat:'all' },
-  { label:'2024 Movies', icon:'▸', filter: m => m[1] == 2024 || m[1] == 2023, badge:'new', cat:'all' },
-  { label:'Action Packed', icon:'⚡', filter: m => m[3]=='Action', badge:'hot', cat:'action' },
-  { label:'Sci-Fi Wonders', icon:'◈', filter: m => m[3]=='Sci-Fi', badge:null, cat:'sci-fi' },
-  { label:'Mind-Bending Thrillers', icon:'◉', filter: m => m[3]=='Thriller', badge:null, cat:'thriller' },
-  { label:'Crime Stories', icon:'■', filter: m => m[3]=='Crime', badge:null, cat:'crime' },
-  { label:'Laugh Out Loud', icon:'ϟ', filter: m => m[3]=='Comedy', badge:null, cat:'comedy' },
-  { label:'Animation Magic', icon:'✦', filter: m => m[3]=='Animation', badge:null, cat:'animation' },
-  { label:'Classic Cinema', icon:'◆', filter: m => m[1] < 1980 && m[2] >= 8.0, badge:'classic', cat:'all' },
+  { label:'Trending Now',       filter: m => m[2] >= 8.0 },
+  { label:'New Releases 2025',   filter: m => m[1] >= 2025 },
+  { label:'Top Rated',          filter: m => m[2] >= 8.8 },
+  { label:'Sci-Fi Universe',    filter: m => m[3] === 'Sci-Fi' },
+  { label:'Horror Nights',      filter: m => m[3] === 'Horror' },
+  { label:'Action Packed',      filter: m => m[3] === 'Action' },
+  { label:'Comedy Picks',       filter: m => m[3] === 'Comedy' },
+  { label:'Drama',              filter: m => m[3] === 'Drama' },
+  { label:'Animation Magic',    filter: m => m[3] === 'Animation' },
+  { label:'Thriller',          filter: m => m[3] === 'Thriller' },
+  { label:'Crime Stories',      filter: m => m[3] === 'Crime' },
+  { label:'Classic Cinema',     filter: m => m[1] < 1985 && m[2] >= 8.0 },
+  { label:'Western',           filter: m => m[3] === 'Western' },
+  { label:'Mystery',           filter: m => m[3] === 'Mystery' },
+  { label:'Watch Later',       filter: m => m[2] >= 7.5 && m[1] >= 2000 },
+];
+
+// ─── YOUTUBE TRAILERS SECTION (at bottom) ───
+const YT_VIDEOS = [
+  { vid: 'Iikttcr0DTo', title: 'Fertility vs Career' },
+  { vid: 'KvnXPKdwW-o', title: 'মাস শেষ টাকা?' },
+  { vid: 'z4ro8pJgKgc', title: 'Podcast Clip' },
+  { vid: 'x6-Ewhf9m3Q', title: 'Podcast Clip' },
+  { vid: 'byJPZg9dg6I', title: 'Podcast Clip' },
+  { vid: 'Shep8cRIqRo', title: 'Podcast Clip' },
+  { vid: 'awybDZ__a0Q', title: 'Podcast Clip' },
+  { vid: 'SFTryjtLQyU', title: 'Podcast Clip' },
+  { vid: '-Gc1aSKtnUA', title: 'Podcast Clip' },
+  { vid: 'ckdgebBfjRs', title: 'Podcast Clip' },
+  { vid: 'gf3oWBuA1pM', title: 'Podcast Clip' },
+  { vid: 'V2txKZUhnyA', title: 'Podcast Clip' },
 ];
 
 const main = document.getElementById('main');
@@ -974,63 +869,86 @@ statusMsg.textContent = `${UNIQUE_MOVIES.length} movies loaded`;
 
 let currentFilter = 'all';
 
-function renderRows(filter) {
+// ─── RENDER ───
+function render() {
   main.innerHTML = '';
-  const mov = UNIQUE_MOVIES.filter(m => filter==='all' || m[3].toLowerCase()===filter);
+  const mov = UNIQUE_MOVIES.filter(m => currentFilter === 'all' || m[3].toLowerCase() === currentFilter);
 
-  ROW_DEFS.forEach((row, ri) => {
+  ROW_DEFS.forEach((row) => {
     const rowMovies = mov.filter(row.filter);
-    if(rowMovies.length < 3) return;
+    if (rowMovies.length < 4) return;
 
     const section = document.createElement('div');
-    section.className = 'row-section';
+    section.className = 'row';
 
     const label = document.createElement('div');
     label.className = 'row-label';
-    let h = '';
-    if(row.badge) h += `<span class="badge badge-${row.badge}">${row.badge==='top'?'Top':row.badge==='new'?'New':row.badge==='hot'?'Hot':'Classic'}</span>`;
-    h += `${row.icon || ''} ${row.label}`;
-    h += ` <span class="count">(${rowMovies.length})</span>`;
-    h += `<button class="arr-btn" onclick="scrollRow(this,'prev')">◀</button>`;
-    h += `<button class="arr-btn" onclick="scrollRow(this,'next')">▶</button>`;
-    label.innerHTML = h;
+    label.textContent = row.label;
     section.appendChild(label);
 
-    const scroll = document.createElement('div');
-    scroll.className = 'row-scroll';
+    const trackWrap = document.createElement('div');
+    trackWrap.className = 'row-track-wrap';
 
-    rowMovies.forEach((movie, ci) => {
+    const track = document.createElement('div');
+    track.className = 'row-track';
+
+    rowMovies.forEach((movie) => {
       const [title, year, rating, genre, color] = movie;
-      const card = document.createElement('div');
-      card.className = 'card' + (ci === 0 && ri === 0 ? ' featured' : '');
-      const hue = (ri * 97 + ci * 53) % 360;
+      const hue = Math.floor(Math.random() * 360);
       const svg = generatePoster(title, genre, color, hue);
+      const card = document.createElement('div');
+      card.className = 'card';
       card.innerHTML = `
         <img src="${svg}" alt="${title}" loading="lazy">
-        ${ci < 3 ? `<div class="card-rank">${ci+1}</div>` : ''}
-        <div class="card-overlay">
+        <div class="card-info">
           <div class="card-title">${title}</div>
-          <div class="card-meta">
+          <div class="card-rating">
             <span class="star">★</span>
-            <span class="rating">${rating}</span>
-            <span class="year">${year}</span>
-          </div>
-        </div>
-        <div class="card-hover-info">
-          <div class="play-btn">▶</div>
-          <div class="card-genre">${genre}</div>
-          <div class="user-rating">
-            <button class="star-btn" onclick="event.stopPropagation();rateMovie(this)">★</button>
+            <span>${rating}</span>
           </div>
         </div>
       `;
       card.onclick = () => showModal(title, year, rating, genre, color, hue);
-      scroll.appendChild(card);
+      track.appendChild(card);
     });
 
-    section.appendChild(scroll);
+    trackWrap.appendChild(track);
+    section.appendChild(trackWrap);
     main.appendChild(section);
   });
+
+  // ─── YOUTUBE TRAILERS SECTION (at bottom, secondary) ───
+  if (currentFilter === 'all') {
+    const ytSection = document.createElement('div');
+    ytSection.className = 'row';
+    ytSection.style.marginTop = '16px';
+    const ytLabel = document.createElement('div');
+    ytLabel.className = 'row-label';
+    ytLabel.style.color = 'rgba(255,255,255,0.35)';
+    ytLabel.textContent = '▸ Podcast & More from @gptoktha';
+    ytSection.appendChild(ytLabel);
+    const ytTrackWrap = document.createElement('div');
+    ytTrackWrap.className = 'row-track-wrap';
+    const ytTrack = document.createElement('div');
+    ytTrack.className = 'row-track';
+    YT_VIDEOS.forEach(v => {
+      const ytCard = document.createElement('div');
+      ytCard.className = 'card';
+      ytCard.style.width = '160px';
+      ytCard.style.height = '90px';
+      ytCard.innerHTML = `
+        <img src="https://i3.ytimg.com/vi/${v.vid}/mqdefault.jpg" alt="${v.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+        <div class="card-info" style="padding:6px 8px 4px;">
+          <div class="card-title" style="font-size:9px;">${v.title}</div>
+        </div>
+      `;
+      ytCard.onclick = () => window.open(`https://www.youtube.com/watch?v=${v.vid}`, '_blank');
+      ytTrack.appendChild(ytCard);
+    });
+    ytTrackWrap.appendChild(ytTrack);
+    ytSection.appendChild(ytTrackWrap);
+    main.appendChild(ytSection);
+  }
 }
 
 function scrollRow(btn, dir) {
@@ -1042,19 +960,19 @@ function scrollRow(btn, dir) {
 function generatePoster(title, genre, bgColor, hue) {
   const lines = wrapText(title, 16);
   const textLines = lines.map((l,i) =>
-    `<text x="80" y="${128 + i*18}" text-anchor="middle" font-size="13" font-weight="800" fill="white" font-family="Georgia,serif" opacity="0.95">${l}</text>`
+    `<text x="85" y="${140 + i*20}" text-anchor="middle" font-size="14" font-weight="800" fill="white" font-family="Georgia,serif" opacity="0.95">${l}</text>`
   ).join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="240" viewBox="0 0 160 240">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="170" height="255" viewBox="0 0 170 255">
     <defs><linearGradient id="g${hue}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${bgColor}"/><stop offset="100%" stop-color="hsl(${hue},30%,8%)"/></linearGradient><linearGradient id="o${hue}" x1="0%" y1="40%" x2="0%" y2="100%"><stop offset="0%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(0,0,0,0.85)"/></linearGradient></defs>
-    <rect width="160" height="240" fill="url(#g${hue})"/>
-    <circle cx="130" cy="30" r="50" fill="hsl(${hue},40%,20%)" opacity="0.3"/>
-    <circle cx="20" cy="200" r="60" fill="hsl(${(hue+180)%360},30%,15%)" opacity="0.2"/>
-    <rect x="0" y="60" width="4" height="80" fill="hsl(${hue},70%,55%)" opacity="0.6"/>
-    <rect x="10" y="12" width="${genre.length*7+10}" height="18" rx="3" fill="hsl(${hue},60%,40%)" opacity="0.85"/>
-    <text x="15" y="24" font-size="9" font-weight="700" fill="white" font-family="Arial" letter-spacing="1">${genre.toUpperCase()}</text>
-    <rect width="160" height="240" fill="url(#o${hue})"/>
+    <rect width="170" height="255" fill="url(#g${hue})"/>
+    <circle cx="140" cy="30" r="55" fill="hsl(${hue},40%,20%)" opacity="0.3"/>
+    <circle cx="20" cy="215" r="65" fill="hsl(${(hue+180)%360},30%,15%)" opacity="0.2"/>
+    <rect x="0" y="65" width="5" height="85" fill="hsl(${hue},70%,55%)" opacity="0.6"/>
+    <rect x="12" y="14" width="${genre.length*7+12}" height="20" rx="3" fill="hsl(${hue},60%,40%)" opacity="0.85"/>
+    <text x="17" y="27" font-size="10" font-weight="700" fill="white" font-family="Arial" letter-spacing="1">${genre.toUpperCase()}</text>
+    <rect width="170" height="255" fill="url(#o${hue})"/>
     ${textLines}
-    <text x="80" y="${152}" text-anchor="middle" font-size="10" fill="hsl(${hue},60%,65%)" font-family="Arial">★ ${hue%5+7}.${(hue*7)%10}</text>
+    <text x="85" y="${162}" text-anchor="middle" font-size="11" fill="hsl(${hue},60%,65%)" font-family="Arial">★ ${(hue%5+7)}.${(hue*7)%10}</text>
   </svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
@@ -1108,43 +1026,18 @@ function rateMovie(btn) {
   btn.classList.toggle('active');
 }
 
-// ─── YOUTUBE THUMBNAIL CLICKS ───
-document.querySelectorAll('.yt-thumb').forEach(el => {
-  el.onclick = () => {
-    window.open('https://www.youtube.com/watch?v=' + el.dataset.vid, '_blank');
-  };
-});
-
 // ─── CATEGORY TABS ───
 document.querySelectorAll('.cat-tab').forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentFilter = tab.dataset.cat;
-    renderRows(currentFilter);
+    render();
   };
 });
 
-// ─── CLOSE MODAL ON OVERLAY CLICK ───
-document.getElementById('modalOverlay').onclick = (e) => {
-  if(e.target === document.getElementById('modalOverlay')) closeModal();
-};
-
-// ─── INJECT YOUTUBE PLAYER ON LOAD FOR RELIABLE AUTOPLAY ───
-window.addEventListener("load", () => {
-  const container = document.getElementById("ytVidPlayer");
-  // Try minimal embed first - bare autoplay+mute, no extra params
-  container.innerHTML += `
-    <iframe
-      src="https://www.youtube.com/embed/Iikttcr0DTo?autoplay=1&amp;mute=1"
-      allow="autoplay; fullscreen"
-      allowfullscreen>
-    </iframe>
-  `;
-});
-
 // ─── INIT ───
-renderRows('all');
+render();
 </script>
 </body>
 </html>
