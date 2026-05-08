@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMDbovie - Movie Ratings</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --gold: #f5c518;
+    --gold-dim: #b8921a;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --accent: #e8214a;
+    --col-gap: 16px;
+    --row-gap: 12px;
+    --label-h: 30px;
+    --header-h: 60px;
+    --main-pad-v: 8px;
+    --card-w: 140px;
+    --card-h: 210px;
+    --card-w-lg: 200px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    width:100%;height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:100;
+  }
+
+  /* HEADER */
+  header{
+    position:fixed;top:0;left:0;right:0;height:60px;
+    display:flex;align-items:center;
+    padding:0 32px;z-index:50;
+    background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,rgba(10,10,15,0) 100%);
+  }
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;}
+  .logo-l{color:var(--bg);background:var(--gold);padding:2px 10px 1px;border-radius:3px;}
+  .logo-r{color:#fff;margin-left:3px;}
+  .logo-r span{color:var(--accent);}
+
+  /* YOUTUBE CHANNEL BAR (gptoktha) */
+  .yt-bar{
+    position:fixed;top:60px;left:0;right:0;height:130px;z-index:40;
+    background:rgba(10,10,15,0.95);
+    border-bottom:1px solid rgba(245,197,24,0.1);
+    display:flex;align-items:center;padding:0 32px;gap:16px;
+    overflow:hidden;
+  }
+  .yt-bar .yt-label{
+    font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--gold-dim);flex-shrink:0;white-space:nowrap;align-self:flex-start;margin-top:14px;
+  }
+  .yt-bar .yt-label .yt-icon{color:#ff0000;margin-right:4px;}
+  .yt-bar .yt-scroll{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    padding:4px 0;flex:1;align-items:center;
+    scrollbar-width:none;
+  }
+  .yt-bar .yt-scroll::-webkit-scrollbar{display:none;}
+  .yt-bar .yt-vid{
+    flex-shrink:0;width:200px;height:113px;border-radius:6px;overflow:hidden;
+    position:relative;background:#000;
+    transition:transform 0.2s,box-shadow 0.2s;
+    cursor:pointer;
+  }
+  .yt-bar .yt-vid:hover{transform:scale(1.04);box-shadow:0 0 16px rgba(255,0,0,0.3);}
+  .yt-bar .yt-vid iframe{
+    width:200px;height:113px;border:none;display:block;pointer-events:none;
+  }
+  .yt-bar .yt-vid img{
+    width:200px;height:113px;object-fit:cover;display:block;
+  }
+  .yt-bar .yt-vid .mute-badge{
+    position:absolute;top:4px;right:4px;
+    background:rgba(0,0,0,0.75);color:#fff;
+    font-size:8px;padding:2px 6px;border-radius:3px;
+    pointer-events:none;
+  }
+  .yt-bar .yt-vid .channel-label{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(0deg,rgba(0,0,0,0.85),transparent);
+    padding:6px 8px 4px;pointer-events:none;
+  }
+  .yt-bar .yt-vid .channel-label span{
+    font-size:8px;color:rgba(255,255,255,0.7);letter-spacing:0.5px;
+  }
+  .yt-bar .play-indicator{
+    position:absolute;top:4px;left:4px;
+    background:rgba(255,0,0,0.9);color:#fff;
+    font-size:7px;padding:2px 6px;border-radius:3px;
+    pointer-events:none;
+    letter-spacing:0.5px;
+  }
+
+  /* CATEGORY TABS */
+  .cat-tabs{
+    position:fixed;top:190px;left:0;right:0;height:36px;z-index:39;
+    display:flex;align-items:center;gap:8px;
+    padding:0 32px;
+    background:linear-gradient(180deg,rgba(10,10,15,0.95),rgba(10,10,15,0));
+  }
+  .cat-tab{
+    font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--muted);background:transparent;
+    border:1px solid rgba(255,255,255,0.08);border-radius:20px;
+    padding:4px 16px;cursor:pointer;
+    transition:all 0.2s;white-space:nowrap;
+  }
+  .cat-tab:hover,.cat-tab.active{color:var(--gold);border-color:var(--gold-dim);background:rgba(245,197,24,0.08);}
+  .cat-tab.active{background:var(--gold);color:#000;border-color:var(--gold);}
+
+  /* MAIN */
+  main{
+    position:fixed;
+    top:226px;bottom:0;left:0;right:0;
+    overflow:hidden;
+    padding:8px 0 0 32px;
+    display:flex;flex-direction:column;gap:var(--row-gap);
+  }
+
+  /* ROW */
+  .row-section{flex-shrink:0;}
+  .row-label{
+    font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    color:var(--muted);height:var(--label-h);
+    display:flex;align-items:center;gap:10px;padding-right:32px;
+  }
+  .row-label .count{
+    font-size:10px;font-weight:400;color:rgba(255,255,255,0.15);
+    font-family:monospace;
+  }
+  .row-label .arr-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;
+    border:1px solid rgba(255,255,255,0.1);
+    background:transparent;color:var(--muted);
+    cursor:pointer;font-size:10px;transition:all 0.2s;
+    margin-left:4px;
+  }
+  .row-label .arr-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(245,197,24,0.1);}
+  .row-scroll{
+    display:flex;gap:var(--col-gap);
+    overflow-x:auto;overflow-y:hidden;
+    padding-bottom:6px;padding-right:32px;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(245,197,24,0.3) transparent;
+  }
+  .row-scroll::-webkit-scrollbar{height:3px;}
+  .row-scroll::-webkit-scrollbar-track{background:transparent;}
+  .row-scroll::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px;}
+
+  /* CARD */
+  .card{
+    flex-shrink:0;width:var(--card-w);height:var(--card-h);
+    border-radius:10px;overflow:hidden;position:relative;cursor:pointer;
+    scroll-snap-align:start;
+    transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;
+    background:var(--card);
+  }
+  .card:hover{
+    transform:translateY(-8px) scale(1.05);
+    box-shadow:0 24px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(245,197,24,0.25);
+  }
+  .card img{width:100%;height:100%;object-fit:cover;display:block;transition:filter 0.3s;}
+  .card:hover img{filter:brightness(0.45) saturate(0.8);}
+  .card-overlay{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(0deg,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.4) 50%,transparent 100%);
+    padding:14px 12px 10px;
+  }
+  .card-title{font-size:12px;font-weight:700;line-height:1.3;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-meta{display:flex;align-items:center;gap:6px;margin-top:5px;}
+  .card-meta .star{color:var(--gold);font-size:10px;}
+  .card-meta .rating{font-size:11px;font-weight:700;color:var(--gold);}
+  .card-meta .year{font-size:10px;color:var(--muted);margin-left:auto;}
+  .card-rank{
+    position:absolute;top:8px;left:8px;
+    width:24px;height:24px;border-radius:50%;
+    background:var(--gold);color:#000;
+    font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+  }
+  .card-hover-info{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;
+    opacity:0;transition:opacity 0.3s;padding:12px;
+  }
+  .card:hover .card-hover-info{opacity:1;}
+  .card-hover-info .play-btn{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--gold);display:flex;align-items:center;justify-content:center;
+    color:#000;font-size:16px;transition:transform 0.2s;
+  }
+  .card-hover-info .play-btn:hover{transform:scale(1.15);}
+  .card-hover-info .card-genre{
+    font-size:9px;color:rgba(255,255,255,0.7);
+    letter-spacing:1px;text-transform:uppercase;text-align:center;
+  }
+  .card .user-rating{
+    position:absolute;bottom:50px;right:8px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    opacity:0;transition:opacity 0.3s;
+  }
+  .card:hover .user-rating{opacity:1;}
+  .user-rating .star-btn{
+    background:none;border:none;color:rgba(255,255,255,0.3);
+    cursor:pointer;font-size:14px;transition:color 0.2s;padding:1px;
+    line-height:1;
+  }
+  .user-rating .star-btn:hover,.user-rating .star-btn.active{color:var(--gold);}
+
+  /* BADGES */
+  .badge{
+    display:inline-block;font-size:8px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-right:8px;
+  }
+  .badge-new{background:var(--accent);color:#fff;}
+  .badge-top{background:var(--gold);color:#000;}
+  .badge-hot{background:#ff6b35;color:#fff;}
+  .badge-classic{background:#2a6f97;color:#fff;}
+
+  /* MODAL */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(12px);
+    display:none;align-items:center;justify-content:center;
+    padding:32px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--surface);border-radius:16px;
+    max-width:640px;width:100%;max-height:80vh;overflow-y:auto;
+    padding:32px;position:relative;
+    border:1px solid rgba(245,197,24,0.1);
+    animation:modalIn 0.3s ease;
+  }
+  @keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-close{
+    position:absolute;top:16px;right:16px;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(255,255,255,0.1);border:none;color:#fff;
+    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background 0.2s;
+  }
+  .modal-close:hover{background:rgba(255,255,255,0.2);}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;color:#fff;margin-bottom:8px;}
+  .modal .meta{display:flex;gap:16px;margin-bottom:16px;}
+  .modal .meta span{font-size:13px;color:var(--muted);}
+  .modal .meta .big-star{color:var(--gold);font-size:18px;}
+  .modal p{color:rgba(255,255,255,0.7);font-size:14px;line-height:1.6;}
+  .modal .modal-poster{
+    width:100%;height:200px;border-radius:10px;margin-bottom:20px;
+    object-fit:cover;
+  }
+  .modal .rate-area{
+    display:flex;gap:8px;margin-top:16px;
+    flex-direction:row-reverse;justify-content:flex-end;
+  }
+  .modal .rate-area button{
+    background:none;border:none;color:rgba(255,255,255,0.15);
+    font-size:28px;cursor:pointer;transition:color 0.2s;
+  }
+  .modal .rate-area button:hover,
+  .modal .rate-area button:hover ~ button,
+  .modal .rate-area:not(:hover) button.active ~ button,
+  .modal .rate-area:not(:hover) button.active{color:var(--gold);}
+
+  /* FOOTER note */
+  .status-msg{
+    position:fixed;bottom:20px;right:32px;
+    font-size:11px;color:rgba(255,255,255,0.2);
+    z-index:1;pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">
+    <span class="logo-l">IMDb</span><span class="logo-r"><span>o</span>vie</span>
+  </span>
+</header>
+
+<!-- YouTube Channel Bar - @gptoktha -->
+<div class="yt-bar">
+  <span class="yt-label"><span class="yt-icon">▶</span> gptoktha</span>
+  <div class="yt-scroll" id="ytScroll">
+    <div class="yt-vid" id="ytVidPlayer"><div class="mute-badge">🔇 AUTO</div><div class="play-indicator">LIVE</div><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="KvnXPKdwW-o"><img src="https://i3.ytimg.com/vi/KvnXPKdwW-o/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="z4ro8pJgKgc"><img src="https://i3.ytimg.com/vi/z4ro8pJgKgc/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="x6-Ewhf9m3Q"><img src="https://i3.ytimg.com/vi/x6-Ewhf9m3Q/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="byJPZg9dg6I"><img src="https://i3.ytimg.com/vi/byJPZg9dg6I/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="Shep8cRIqRo"><img src="https://i3.ytimg.com/vi/Shep8cRIqRo/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="awybDZ__a0Q"><img src="https://i3.ytimg.com/vi/awybDZ__a0Q/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="SFTryjtLQyU"><img src="https://i3.ytimg.com/vi/SFTryjtLQyU/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="-Gc1aSKtnUA"><img src="https://i3.ytimg.com/vi/-Gc1aSKtnUA/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="ckdgebBfjRs"><img src="https://i3.ytimg.com/vi/ckdgebBfjRs/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="gf3oWBuA1pM"><img src="https://i3.ytimg.com/vi/gf3oWBuA1pM/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+    <div class="yt-vid yt-thumb" data-vid="V2txKZUhnyA"><img src="https://i3.ytimg.com/vi/V2txKZUhnyA/hqdefault.jpg" alt="" loading="lazy"><div class="channel-label"><span>@gptoktha</span></div></div>
+  </div>
+</div>
+
+<!-- Category Tabs -->
+<div class="cat-tabs" id="catTabs">
+  <button class="cat-tab active" data-cat="all">All</button>
+  <button class="cat-tab" data-cat="action">Action</button>
+  <button class="cat-tab" data-cat="drama">Drama</button>
+  <button class="cat-tab" data-cat="sci-fi">Sci-Fi</button>
+  <button class="cat-tab" data-cat="horror">Horror</button>
+  <button class="cat-tab" data-cat="thriller">Thriller</button>
+  <button class="cat-tab" data-cat="crime">Crime</button>
+  <button class="cat-tab" data-cat="comedy">Comedy</button>
+  <button class="cat-tab" data-cat="animation">Animation</button>
+  <button class="cat-tab" data-cat="mystery">Mystery</button>
+</div>
+
+<main id="main"></main>
+<div class="status-msg" id="statusMsg"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ======================== 500+ MOVIES DATABASE ========================
+const MOVIES = [
+  // ─── TOP RATED ALL TIME (Classics & Modern Masterpieces) ───
+  ["The Shawshank Redemption",1994,9.3,"Drama","#1c1208"],
+  ["The Godfather",1972,9.2,"Crime","#120808"],
+  ["The Dark Knight",2008,9.0,"Action","#08080f"],
+  ["The Godfather Part II",1974,9.0,"Crime","#100808"],
+  ["12 Angry Men",1957,9.0,"Drama","#181410"],
+  ["Schindler's List",1993,9.0,"Drama","#101010"],
+  ["The Lord of the Rings: The Return of the King",2003,9.0,"Action","#1a1a0a"],
+  ["Pulp Fiction",1994,8.9,"Crime","#201008"],
+  ["The Good, the Bad and the Ugly",1966,8.8,"Western","#2a1a08"],
+  ["Fight Club",1999,8.8,"Thriller","#180808"],
+  ["Forrest Gump",1994,8.8,"Drama","#1a2a1a"],
+  ["Inception",2010,8.8,"Sci-Fi","#080818"],
+  ["The Lord of the Rings: The Fellowship of the Ring",2001,8.8,"Action","#0a1a0a"],
+  ["Star Wars: Episode V - The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f"],
+  ["The Matrix",1999,8.7,"Sci-Fi","#081408"],
+  ["Interstellar",2014,8.7,"Sci-Fi","#080818"],
+  ["Goodfellas",1990,8.7,"Crime","#100808"],
+  ["One Flew Over the Cuckoo's Nest",1975,8.7,"Drama","#1a1a1a"],
+  ["Se7en",1995,8.6,"Thriller","#140a0a"],
+  ["Seven Samurai",1954,8.6,"Action","#1a1a0a"],
+  ["The Silence of the Lambs",1991,8.6,"Thriller","#0a140a"],
+  ["Saving Private Ryan",1998,8.6,"War","#1a2a1a"],
+  ["City of God",2002,8.6,"Crime","#2a1a0a"],
+  ["Spirited Away",2001,8.6,"Animation","#0a1a2a"],
+  ["The Green Mile",1999,8.6,"Drama","#0a1a0a"],
+  ["Life Is Beautiful",1997,8.6,"Drama","#1a0a0a"],
+  ["Parasite",2019,8.5,"Thriller","#0a0a0a"],
+  ["Gladiator",2000,8.5,"Action","#2a1a08"],
+  ["The Prestige",2006,8.5,"Mystery","#080810"],
+  ["The Departed",2006,8.5,"Crime","#1a0808"],
+  ["Whiplash",2014,8.5,"Drama","#080808"],
+  ["The Lion King",1994,8.5,"Animation","#2a1a0a"],
+  ["Back to the Future",1985,8.5,"Sci-Fi","#0a1a2a"],
+  ["Terminator 2: Judgment Day",1991,8.5,"Action","#080a0f"],
+  ["Django Unchained",2012,8.5,"Western","#2a0a0a"],
+  ["Casablanca",1942,8.5,"Drama","#080808"],
+  ["Rear Window",1954,8.5,"Mystery","#0a0a14"],
+  ["Psycho",1960,8.5,"Horror","#0a0808"],
+  ["Citizen Kane",1941,8.3,"Drama","#080808"],
+  ["Alien",1979,8.5,"Horror","#080a08"],
+  ["Star Wars: Episode IV - A New Hope",1977,8.6,"Sci-Fi","#0a0a14"],
+  ["The Lord of the Rings: The Two Towers",2002,8.8,"Action","#0a1a0a"],
+  ["Leon: The Professional",1994,8.5,"Action","#1a0a0a"],
+  ["American History X",1998,8.5,"Drama","#0a0a0a"],
+  ["The Usual Suspects",1995,8.5,"Crime","#0a0a14"],
+  ["Vertigo",1958,8.3,"Mystery","#0a0a18"],
+  ["Apocalypse Now",1979,8.4,"War","#1a0a00"],
+  ["Taxi Driver",1976,8.2,"Drama","#1a0800"],
+  ["Braveheart",1995,8.3,"Action","#1a1a0a"],
+  ["The Pianist",2002,8.5,"Drama","#080808"],
+  ["Eternal Sunshine of the Spotless Mind",2004,8.3,"Drama","#0a0a1a"],
+  ["Memento",2000,8.4,"Mystery","#080808"],
+  ["Reservoir Dogs",1992,8.3,"Crime","#1a0808"],
+  ["Full Metal Jacket",1987,8.3,"War","#0a1008"],
+  ["Requiem for a Dream",2000,8.3,"Drama","#0a0808"],
+  ["Oldboy",2003,8.3,"Thriller","#0a0808"],
+  ["The Shining",1980,8.4,"Horror","#0a0800"],
+  ["Aliens",1986,8.4,"Action","#080a0f"],
+  ["Blade Runner",1982,8.1,"Sci-Fi","#080818"],
+  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818"],
+  ["Mad Max: Fury Road",2015,8.1,"Action","#2a0a00"],
+  ["Joker",2019,8.4,"Crime","#1a080a"],
+  ["Avengers: Endgame",2019,8.4,"Action","#080818"],
+  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f"],
+  ["Inglourious Basterds",2009,8.3,"War","#1a0a00"],
+  ["The Wolf of Wall Street",2013,8.2,"Comedy","#1a1a0a"],
+  ["Dunkirk",2017,7.8,"War","#0a1214"],
+  ["A Beautiful Mind",2001,8.2,"Drama","#0a1a1a"],
+  ["The Sixth Sense",1999,8.1,"Thriller","#0a0808"],
+  ["Finding Nemo",2003,8.1,"Animation","#0a1428"],
+  ["Up",2009,8.3,"Animation","#1a1a2a"],
+  ["Toy Story",1995,8.3,"Animation","#1a1a2a"],
+  ["Toy Story 3",2010,8.3,"Animation","#1a1a2a"],
+  ["WALL-E",2008,8.4,"Animation","#0a0a18"],
+  ["Inside Out",2015,8.1,"Animation","#0a2a2a"],
+  ["Coco",2017,8.4,"Animation","#2a1808"],
+  ["Ratatouille",2007,8.0,"Animation","#1a1a18"],
+  ["Howl's Moving Castle",2004,8.2,"Animation","#0a1a2a"],
+  ["Princess Mononoke",1997,8.4,"Animation","#0a1a0a"],
+  ["My Neighbor Totoro",1988,8.2,"Animation","#0a2a1a"],
+  ["Grave of the Fireflies",1988,8.5,"Animation","#1a0a08"],
+  ["Akira",1988,8.0,"Animation","#1a0808"],
+  ["The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f"],
+  ["Raiders of the Lost Ark",1981,8.4,"Action","#1a1a0a"],
+  ["Jurassic Park",1993,8.2,"Action","#0a1a0a"],
+  ["E.T. the Extra-Terrestrial",1982,7.9,"Sci-Fi","#0a0a1a"],
+  ["Indiana Jones and the Last Crusade",1989,8.2,"Action","#1a1a0a"],
+  ["Die Hard",1988,8.2,"Action","#0a0a0f"],
+  ["The Terminator",1984,8.0,"Action","#080a0f"],
+  ["Predator",1987,7.8,"Action","#0a0a0a"],
+  ["Rocky",1976,8.1,"Drama","#1a0a00"],
+  ["Platoon",1986,8.1,"War","#0a1a0a"],
+  ["Good Will Hunting",1997,8.3,"Drama","#080808"],
+  ["The Truman Show",1998,8.2,"Drama","#0a1a1a"],
+  ["Rain Man",1988,8.0,"Drama","#0a0a0a"],
+  ["Catch Me If You Can",2002,8.1,"Crime","#0a0a14"],
+  ["The Grand Budapest Hotel",2014,8.1,"Comedy","#2a1a1a"],
+  ["There Will Be Blood",2007,8.2,"Drama","#1a0a08"],
+  ["No Country for Old Men",2007,8.2,"Thriller","#1a1208"],
+  ["Fargo",1996,8.1,"Crime","#0a0a0f"],
+  ["Gone Girl",2014,8.1,"Thriller","#0a0810"],
+  ["Prisoners",2013,8.1,"Thriller","#08080a"],
+  ["Sicario",2015,7.7,"Action","#1a0a00"],
+
+  // ─── 2024 MOVIES ───
+  ["Dune: Part Two",2024,8.6,"Sci-Fi","#1a2a4a"],
+  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a"],
+  ["The Brutalist",2024,7.8,"Drama","#1a1a1a"],
+  ["Furiosa: A Mad Max Saga",2024,7.4,"Action","#3a1a0a"],
+  ["Alien: Romulus",2024,7.3,"Horror","#0a1a0a"],
+  ["Conclave",2024,7.5,"Thriller","#1a1528"],
+  ["Deadpool & Wolverine",2024,7.9,"Action","#280808"],
+  ["The Substance",2024,7.3,"Horror","#200810"],
+  ["Anora",2024,7.4,"Comedy","#1a1a1a"],
+  ["Inside Out 2",2024,7.8,"Animation","#0a2a2a"],
+  ["The Wild Robot",2024,8.2,"Animation","#0a2a1a"],
+  ["Dune: Part Two",2024,8.6,"Sci-Fi","#1a2a4a"],
+  ["Challengers",2024,7.6,"Drama","#2a2a0a"],
+  ["Civil War",2024,7.1,"Action","#1a0a0a"],
+  ["Twisters",2024,7.2,"Action","#0a1428"],
+  ["Longlegs",2024,5.8,"Horror","#0a0a14"],
+  ["A Quiet Place: Day One",2024,6.3,"Horror","#14140a"],
+  ["Kingdom of the Planet of the Apes",2024,6.8,"Sci-Fi","#0a2a0a"],
+  ["Godzilla x Kong: The New Empire",2024,6.0,"Action","#0a1a14"],
+  ["The Fall Guy",2024,6.8,"Action","#1a0a0a"],
+  ["Beetlejuice Beetlejuice",2024,6.6,"Comedy","#1a0a1a"],
+  ["Wicked",2024,7.3,"Fantasy","#1a0a2a"],
+  ["Nosferatu",2024,7.1,"Horror","#080808"],
+  ["Gladiator II",2024,6.5,"Action","#2a1808"],
+  ["Heretic",2024,7.1,"Horror","#0e0e18"],
+  ["Sing Sing",2024,7.6,"Drama","#101010"],
+  ["A Real Pain",2024,7.0,"Drama","#1a1a1a"],
+  ["The Bikeriders",2024,7.0,"Crime","#1a0a00"],
+  ["Blink Twice",2024,6.9,"Mystery","#140a20"],
+  ["Smile 2",2024,6.7,"Horror","#0a0808"],
+  ["Trap",2024,6.8,"Thriller","#200a14"],
+  ["Borderlands",2024,3.0,"Action","#1a2a0a"],
+  ["Ghostbusters: Frozen Empire",2024,6.2,"Comedy","#1a1a08"],
+  ["Kung Fu Panda 4",2024,6.3,"Animation","#1a1a0a"],
+  ["Despicable Me 4",2024,6.2,"Animation","#0a1a2a"],
+  ["Moana 2",2024,6.3,"Animation","#0a1a28"],
+  ["Mufasa: The Lion King",2024,6.6,"Animation","#2a1a0a"],
+  ["Sonic the Hedgehog 3",2024,7.1,"Action","#0a0a2a"],
+  ["Venom: The Last Dance",2024,6.0,"Action","#0a0808"],
+  ["Deadpool & Wolverine",2024,7.9,"Action","#280808"],
+
+  // ─── 2023 MOVIES ───
+  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a"],
+  ["Barbie",2023,6.9,"Comedy","#2a0a2a"],
+  ["Killers of the Flower Moon",2023,7.6,"Drama","#1a0a00"],
+  ["The Batman",2022,7.8,"Action","#080814"],
+  ["Everything Everywhere All at Once",2022,7.8,"Sci-Fi","#180818"],
+  ["Top Gun: Maverick",2022,8.2,"Action","#0a1420"],
+  ["The Whale",2022,7.7,"Drama","#1a1408"],
+  ["All Quiet on the Western Front",2022,7.8,"War","#08080a"],
+  ["The Banshees of Inisherin",2022,7.7,"Comedy","#1a1a08"],
+  ["Elvis",2022,7.3,"Drama","#201008"],
+  ["Avatar: The Way of Water",2022,7.5,"Sci-Fi","#0a1a2a"],
+  ["Bullet Train",2022,7.3,"Action","#1a0808"],
+  ["Nope",2022,6.8,"Horror","#0a0a18"],
+  ["Glass Onion",2022,7.1,"Mystery","#0a1818"],
+  ["The Menu",2022,7.2,"Thriller","#080a10"],
+  ["Barbarian",2022,7.0,"Horror","#100a10"],
+  ["Prey",2022,7.1,"Action","#0a1a0a"],
+  ["The Northman",2022,7.1,"Action","#0a0808"],
+  ["The Fabelmans",2022,7.5,"Drama","#0a0a14"],
+  ["TAR",2022,7.4,"Drama","#080808"],
+  ["Decision to Leave",2022,7.3,"Mystery","#0a0a18"],
+  ["Marcel the Shell with Shoes On",2022,7.9,"Animation","#1a1a2a"],
+  ["Pinocchio",2022,7.6,"Animation","#1a0a08"],
+  ["Turning Red",2022,7.0,"Animation","#2a0a0a"],
+  ["The Woman King",2022,6.9,"Action","#1a0a00"],
+
+  // ─── 2021 MOVIES ───
+  ["Dune",2021,8.0,"Sci-Fi","#1a2a3a"],
+  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a"],
+  ["The Power of the Dog",2021,6.8,"Western","#0a1408"],
+  ["Drive My Car",2021,7.5,"Drama","#0a0a0a"],
+  ["Licorice Pizza",2021,7.1,"Comedy","#2a1a08"],
+  ["A Quiet Place Part II",2021,7.2,"Horror","#0a0a0a"],
+  ["No Time to Die",2021,7.3,"Action","#0a0a0f"],
+  ["The French Dispatch",2021,7.1,"Comedy","#1a0a08"],
+  ["West Side Story",2021,7.1,"Musical","#1a0a14"],
+  ["Dune",2021,8.0,"Sci-Fi","#1a2a3a"],
+  ["The Green Knight",2021,6.6,"Fantasy","#0a1a08"],
+  ["The Last Duel",2021,7.4,"Action","#0a0808"],
+  ["Belfast",2021,7.2,"Drama","#0a0a0a"],
+  ["Soul",2020,8.0,"Animation","#0a1428"],
+  ["Encanto",2021,7.2,"Animation","#2a1a0a"],
+  ["Luca",2021,7.4,"Animation","#0a2a28"],
+  ["Raya and the Last Dragon",2021,7.3,"Animation","#0a1a2a"],
+  ["The Mitchells vs the Machines",2021,7.6,"Animation","#0a2a1a"],
+  ["Flee",2021,7.9,"Animation","#0a0a0a"],
+
+  // ─── 2020 MOVIES ───
+  ["Parasite",2019,8.5,"Thriller","#0a0a0a"],
+  ["1917",2019,8.2,"War","#0a0a0a"],
+  ["Joker",2019,8.4,"Crime","#1a080a"],
+  ["Once Upon a Time in Hollywood",2019,7.6,"Comedy","#1a0a00"],
+  ["The Irishman",2019,7.8,"Crime","#0a0808"],
+  ["Marriage Story",2019,7.9,"Drama","#080808"],
+  ["Knives Out",2019,7.9,"Mystery","#180c08"],
+  ["Ford v Ferrari",2019,8.1,"Action","#1a0a00"],
+  ["Jojo Rabbit",2019,7.9,"Comedy","#1a1a0a"],
+  ["Uncut Gems",2019,7.4,"Thriller","#1a0a0a"],
+  ["Portrait of a Lady on Fire",2019,8.1,"Drama","#0a0a14"],
+  ["Midsommar",2019,7.1,"Horror","#18180a"],
+  ["Hereditary",2018,7.3,"Horror","#100808"],
+  ["A Star Is Born",2018,7.6,"Drama","#1a0808"],
+  ["BlacKkKlansman",2018,7.5,"Comedy","#0a0a0a"],
+  ["Roma",2018,7.7,"Drama","#080808"],
+  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Animation","#0a0a2a"],
+  ["Bohemian Rhapsody",2018,7.9,"Drama","#08080a"],
+  ["A Quiet Place",2018,7.5,"Horror","#0a0a0a"],
+  ["Get Out",2017,7.7,"Horror","#080808"],
+
+  // ─── CLASSIC HORROR ───
+  ["The Shining",1980,8.4,"Horror","#0a0800"],
+  ["The Exorcist",1973,8.0,"Horror","#080808"],
+  ["Halloween",1978,7.7,"Horror","#080800"],
+  ["A Nightmare on Elm Street",1984,7.4,"Horror","#0a000a"],
+  ["The Thing",1982,8.2,"Horror","#0a0808"],
+  ["Scream",1996,7.4,"Horror","#0a0a0a"],
+  ["The Texas Chain Saw Massacre",1974,7.4,"Horror","#080000"],
+  ["Rosemary's Baby",1968,7.9,"Horror","#080808"],
+  ["Hereditary",2018,7.3,"Horror","#100808"],
+  ["Midsommar",2019,7.1,"Horror","#18180a"],
+  ["The Witch",2015,7.0,"Horror","#080808"],
+  ["It Follows",2014,6.8,"Horror","#0a0a14"],
+  ["The Babadook",2014,6.8,"Horror","#08080a"],
+  ["Talk to Me",2023,7.1,"Horror","#080818"],
+  ["Smile",2022,6.6,"Horror","#0a0808"],
+  ["X",2022,6.6,"Horror","#1a0808"],
+  ["Pearl",2022,7.0,"Horror","#1a0008"],
+  ["The Invisible Man",2020,7.1,"Horror","#0a0810"],
+  ["A Quiet Place",2018,7.5,"Horror","#0a0a0a"],
+  ["A Quiet Place Part II",2021,7.2,"Horror","#0a0a0a"],
+  ["Nope",2022,6.8,"Horror","#0a0a18"],
+  ["Us",2019,6.8,"Horror","#0a0a0a"],
+  ["Get Out",2017,7.7,"Horror","#080808"],
+  ["The Ring",2002,7.1,"Horror","#080a10"],
+  ["The Descent",2005,7.2,"Horror","#080a08"],
+  ["Pan's Labyrinth",2006,8.2,"Fantasy","#0a0810"],
+  ["Let the Right One In",2008,7.9,"Horror","#080a14"],
+
+  // ─── SCI-FI ───
+  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818"],
+  ["Arrival",2016,7.9,"Sci-Fi","#0a0a18"],
+  ["Ex Machina",2015,7.7,"Sci-Fi","#0a0a14"],
+  ["Interstellar",2014,8.7,"Sci-Fi","#080818"],
+  ["The Martian",2015,8.0,"Sci-Fi","#1a0a00"],
+  ["Gravity",2013,7.7,"Sci-Fi","#08080f"],
+  ["Her",2013,8.0,"Sci-Fi","#1a0a14"],
+  ["Edge of Tomorrow",2014,7.9,"Sci-Fi","#080a0f"],
+  ["Looper",2012,7.4,"Sci-Fi","#0a0810"],
+  ["Moon",2009,7.8,"Sci-Fi","#080810"],
+  ["District 9",2009,7.9,"Sci-Fi","#1a0a00"],
+  ["Children of Men",2006,7.9,"Sci-Fi","#0a0a0a"],
+  ["Minority Report",2002,7.6,"Sci-Fi","#080a14"],
+  ["The Matrix Reloaded",2003,7.2,"Sci-Fi","#081408"],
+  ["Sunshine",2007,7.2,"Sci-Fi","#1a1a0a"],
+  ["Prometheus",2012,7.0,"Sci-Fi","#0a0a0a"],
+  ["Under the Skin",2013,6.3,"Sci-Fi","#080808"],
+  ["Contact",1997,7.4,"Sci-Fi","#080818"],
+  ["Close Encounters",1977,7.6,"Sci-Fi","#080818"],
+  ["War of the Worlds",2005,6.5,"Sci-Fi","#0a0a0a"],
+
+  // ─── ACTION ───
+  ["Mad Max: Fury Road",2015,8.1,"Action","#2a0a00"],
+  ["John Wick",2014,7.4,"Action","#080808"],
+  ["John Wick: Chapter 2",2017,7.4,"Action","#080808"],
+  ["John Wick: Chapter 3",2019,7.4,"Action","#080808"],
+  ["John Wick: Chapter 4",2023,7.7,"Action","#080808"],
+  ["The Dark Knight Rises",2012,8.4,"Action","#08080f"],
+  ["Batman Begins",2005,8.2,"Action","#080814"],
+  ["The Batman",2022,7.8,"Action","#080814"],
+  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a"],
+  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Action","#0a0a2a"],
+  ["Spider-Man: Across the Spider-Verse",2023,8.6,"Action","#0a0a2a"],
+  ["Avengers: Endgame",2019,8.4,"Action","#080818"],
+  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f"],
+  ["Logan",2017,8.1,"Action","#080808"],
+  ["X-Men: Days of Future Past",2014,7.9,"Action","#080814"],
+  ["Captain America: The Winter Soldier",2014,7.7,"Action","#08080f"],
+  ["Mission: Impossible - Fallout",2018,7.7,"Action","#08080f"],
+  ["Mission: Impossible - Ghost Protocol",2011,7.4,"Action","#08080f"],
+  ["The Bourne Ultimatum",2007,8.0,"Action","#08080a"],
+  ["Casino Royale",2006,8.0,"Action","#08080f"],
+  ["Skyfall",2012,7.7,"Action","#080810"],
+  ["Speed",1994,7.2,"Action","#0a0a14"],
+  ["Lethal Weapon",1987,7.6,"Action","#0a0a0f"],
+  ["Die Hard",1988,8.2,"Action","#0a0a0f"],
+  ["First Blood",1982,7.7,"Action","#0a1a0a"],
+  ["Terminator 2",1991,8.5,"Action","#080a0f"],
+  ["Predator",1987,7.8,"Action","#0a0a0a"],
+  ["Con Air",1997,6.9,"Action","#0a0a14"],
+  ["The Fugitive",1993,7.8,"Action","#08080a"],
+  ["Face/Off",1997,7.2,"Action","#0a0a0f"],
+  ["The Rock",1996,7.4,"Action","#0a0a14"],
+
+  // ─── COMEDY ───
+  ["The Big Lebowski",1998,8.1,"Comedy","#1a1a0a"],
+  ["Monty Python and the Holy Grail",1975,8.2,"Comedy","#0a0a0a"],
+  ["Airplane!",1980,7.7,"Comedy","#0a0a14"],
+  ["Groundhog Day",1993,8.0,"Comedy","#0a0a0a"],
+  ["Anchorman",2004,7.1,"Comedy","#1a0a0a"],
+  ["Superbad",2007,7.6,"Comedy","#0a0a0a"],
+  ["Bridesmaids",2011,6.8,"Comedy","#1a0a0a"],
+  ["The Hangover",2009,7.7,"Comedy","#1a0a00"],
+  ["Step Brothers",2008,6.9,"Comedy","#0a0a14"],
+  ["Dumb and Dumber",1994,7.3,"Comedy","#0a0a0a"],
+  ["Ferris Bueller's Day Off",1986,7.8,"Comedy","#0a0a1a"],
+  ["Back to the Future",1985,8.5,"Comedy","#0a1a2a"],
+  ["Ghostbusters",1984,7.8,"Comedy","#1a1a08"],
+  ["The Princess Bride",1987,8.0,"Comedy","#0a1a0a"],
+  ["Napoleon Dynamite",2004,6.9,"Comedy","#1a1a0a"],
+  ["Office Space",1999,7.7,"Comedy","#0a0a14"],
+  ["Zoolander",2001,6.5,"Comedy","#1a0a0a"],
+  ["Tropic Thunder",2008,7.1,"Comedy","#0a0a00"],
+  ["The 40-Year-Old Virgin",2005,7.1,"Comedy","#0a0a0a"],
+  ["Knocked Up",2007,7.1,"Comedy","#0a0a00"],
+  ["Shaun of the Dead",2004,7.9,"Comedy","#0a0a0a"],
+  ["Hot Fuzz",2007,7.8,"Comedy","#0a0a08"],
+  ["Borat",2006,7.3,"Comedy","#1a0a00"],
+  ["Team America",2004,7.2,"Comedy","#0a0a14"],
+  ["South Park: Bigger Longer & Uncut",1999,7.7,"Comedy","#0a0a14"],
+
+  // ─── CRIME ───
+  ["The Godfather",1972,9.2,"Crime","#120808"],
+  ["The Godfather Part II",1974,9.0,"Crime","#100808"],
+  ["Goodfellas",1990,8.7,"Crime","#100808"],
+  ["Pulp Fiction",1994,8.9,"Crime","#201008"],
+  ["The Departed",2006,8.5,"Crime","#1a0808"],
+  ["Scarface",1983,8.3,"Crime","#1a0800"],
+  ["Heat",1995,8.2,"Crime","#0a0810"],
+  ["The Usual Suspects",1995,8.5,"Crime","#0a0a14"],
+  ["LA Confidential",1997,8.2,"Crime","#0a0814"],
+  ["Reservoir Dogs",1992,8.3,"Crime","#1a0808"],
+  ["City of God",2002,8.6,"Crime","#2a1a0a"],
+  ["Casino",1995,8.2,"Crime","#100808"],
+  ["The Untouchables",1987,7.9,"Crime","#080810"],
+  ["American Gangster",2007,7.8,"Crime","#0a0808"],
+  ["The French Connection",1971,7.9,"Crime","#080808"],
+  ["Chinatown",1974,8.2,"Crime","#0a0808"],
+  ["Mystic River",2003,7.9,"Crime","#08080a"],
+  ["Gone Baby Gone",2007,7.6,"Crime","#08080a"],
+  ["Sin City",2005,7.6,"Crime","#080808"],
+  ["The Town",2010,7.5,"Crime","#0a080a"],
+  ["Good Time",2017,7.3,"Crime","#080808"],
+  ["Baby Driver",2017,7.6,"Crime","#0a0a14"],
+
+  // ─── THRILLER ───
+  ["Se7en",1995,8.6,"Thriller","#140a0a"],
+  ["The Silence of the Lambs",1991,8.6,"Thriller","#0a140a"],
+  ["Parasite",2019,8.5,"Thriller","#0a0a0a"],
+  ["Fight Club",1999,8.8,"Thriller","#180808"],
+  ["Memento",2000,8.4,"Thriller","#080808"],
+  ["Oldboy",2003,8.3,"Thriller","#0a0808"],
+  ["Prisoners",2013,8.1,"Thriller","#08080a"],
+  ["Gone Girl",2014,8.1,"Thriller","#0a0810"],
+  ["Shutter Island",2010,8.2,"Thriller","#080810"],
+  ["Black Swan",2010,8.0,"Thriller","#08080a"],
+  ["The Prestige",2006,8.5,"Thriller","#080810"],
+  ["Zodiac",2007,7.7,"Thriller","#0a0810"],
+  ["Nightcrawler",2014,7.8,"Thriller","#1a0808"],
+  ["Drive",2011,7.8,"Thriller","#0a0818"],
+  ["The Girl with the Dragon Tattoo",2011,7.8,"Thriller","#080808"],
+  ["Misery",1990,7.8,"Thriller","#080808"],
+  ["Cape Fear",1991,7.6,"Thriller","#08080a"],
+  ["A Few Good Men",1992,7.7,"Thriller","#08080f"],
+  ["The Fugitive",1993,7.8,"Thriller","#08080a"],
+  ["Training Day",2001,7.7,"Thriller","#0a0808"],
+  ["Collateral",2004,7.5,"Thriller","#080810"],
+  ["Inside Man",2006,7.6,"Thriller","#0a0a14"],
+  ["The Conversation",1974,7.9,"Thriller","#080808"],
+
+  // ─── MYSTERY ───
+  ["Knives Out",2019,7.9,"Mystery","#180c08"],
+  ["Glass Onion",2022,7.1,"Mystery","#0a1818"],
+  ["The Girl with the Dragon Tattoo",2011,7.8,"Mystery","#080808"],
+  ["Chinatown",1974,8.2,"Mystery","#0a0808"],
+  ["Rear Window",1954,8.5,"Mystery","#0a0a14"],
+  ["Vertigo",1958,8.3,"Mystery","#0a0a18"],
+  ["The Prestige",2006,8.5,"Mystery","#080810"],
+  ["Blade Runner",1982,8.1,"Mystery","#080818"],
+  ["Blade Runner 2049",2017,8.0,"Mystery","#0a0818"],
+  ["Gone Girl",2014,8.1,"Mystery","#0a0810"],
+  ["Shutter Island",2010,8.2,"Mystery","#080810"],
+  ["Memoirs of a Geisha",2005,7.3,"Drama","#1a0a14"],
+  ["Mystic River",2003,7.9,"Mystery","#08080a"],
+  ["Se7en",1995,8.6,"Mystery","#140a0a"],
+  ["The Usual Suspects",1995,8.5,"Mystery","#0a0a14"],
+  ["Memento",2000,8.4,"Mystery","#080808"],
+  ["Prisoners",2013,8.1,"Mystery","#08080a"],
+  ["Mulholland Drive",2001,7.9,"Mystery","#0a0814"],
+  ["Lost Highway",1997,7.3,"Mystery","#080808"],
+  ["Blue Velvet",1986,7.7,"Mystery","#0a0814"],
+
+  // ─── WESTERN ───
+  ["The Good, the Bad and the Ugly",1966,8.8,"Western","#2a1a08"],
+  ["Once Upon a Time in the West",1968,8.5,"Western","#2a0a00"],
+  ["Django Unchained",2012,8.5,"Western","#2a0a0a"],
+  ["Unforgiven",1992,8.2,"Western","#1a0a00"],
+  ["The Hateful Eight",2015,7.8,"Western","#0a0808"],
+  ["Tombstone",1993,7.8,"Western","#1a0a00"],
+  ["True Grit",2010,7.6,"Western","#1a0a00"],
+  ["No Country for Old Men",2007,8.2,"Western","#1a1208"],
+  ["There Will Be Blood",2007,8.2,"Drama","#1a0a08"],
+  ["The Revenant",2015,8.0,"Western","#0a1408"],
+  ["3:10 to Yuma",2007,7.7,"Western","#1a0a00"],
+  ["Hell or High Water",2016,7.6,"Western","#1a0a00"],
+  ["The Power of the Dog",2021,6.8,"Western","#0a1408"],
+  ["Brokeback Mountain",2005,7.7,"Drama","#0a1a08"],
+
+  // ─── 2025 MOVIES ───
+  ["Hamnet",2025,8.2,"Drama","#1a0a0a"],
+  ["Sinners",2025,7.7,"Horror","#1a0808"],
+  ["The Fantastic Four: First Steps",2025,6.9,"Action","#0a0a2a"],
+  ["Mission: Impossible - The Final Reckoning",2025,7.6,"Action","#08080f"],
+  ["Superman",2025,7.0,"Action","#0a0a2a"],
+  ["Avatar: Fire and Ash",2025,7.0,"Sci-Fi","#0a1a2a"],
+  ["How to Train Your Dragon",2025,7.5,"Action","#0a1a1a"],
+  ["Lilo & Stitch",2025,7.2,"Animation","#0a2a28"],
+  ["Zootopia 2",2025,7.4,"Animation","#1a1a2a"],
+  ["Wicked: For Good",2025,7.5,"Musical","#1a0a2a"],
+  ["A Minecraft Movie",2025,6.1,"Action","#0a1a0a"],
+  ["Jurassic World: Rebirth",2025,6.1,"Action","#0a1a0a"],
+  ["Final Destination: Bloodlines",2025,6.6,"Horror","#08080a"],
+  ["Thunderbolts*",2025,6.4,"Action","#08080f"],
+  ["Captain America: Brave New World",2025,6.0,"Action","#08080f"],
+  ["Predator: Badlands",2025,6.3,"Action","#0a0a0a"],
+  ["The Conjuring: Last Rites",2025,6.3,"Horror","#080810"],
+  ["F1: The Movie",2025,6.9,"Action","#0a0a0a"],
+  ["Dog Man",2025,6.6,"Animation","#0a1a2a"],
+  ["Mortal Kombat II",2025,7.3,"Action","#080808"],
+  ["Wake Up Dead Man",2025,7.1,"Mystery","#0a0810"],
+  ["28 Years Later",2025,7.2,"Horror","#080808"],
+  ["Dune: Part Three",2025,8.4,"Sci-Fi","#1a2a4a"],
+  ["The Bad Guys 2",2025,7.0,"Animation","#0a1a0a"],
+  ["One Battle After Another",2025,7.8,"Action","#1a0808"],
+  ["Black Bag",2025,7.4,"Thriller","#08080f"],
+  ["Marty Supreme",2025,7.6,"Drama","#1a0a0a"],
+  ["Sentimental Value",2025,7.3,"Drama","#0a0a0a"],
+  ["Eddington",2025,7.2,"Comedy","#1a0a00"],
+  ["The Phoenician Scheme",2025,7.0,"Comedy","#1a1a0a"],
+  ["Weapons",2025,7.5,"Horror","#080808"],
+  ["Bugonia",2025,7.1,"Comedy","#0a0a0a"],
+  ["The Secret Agent",2025,7.3,"Thriller","#080810"],
+  ["Train Dreams",2025,7.6,"Drama","#0a0a0a"],
+  ["Sorry, Baby",2025,7.4,"Drama","#0a0808"],
+  ["Peter Hujar's Day",2025,7.0,"Drama","#0a0a0a"],
+  ["Nirvanna the Band the Show the Movie",2025,7.8,"Comedy","#0a0a18"],
+  ["Pillion",2025,6.9,"Thriller","#0a0808"],
+  ["Bring Her Back",2025,7.0,"Horror","#08080a"],
+  ["The Naked Gun",2025,7.2,"Comedy","#0a0a14"],
+  ["The Lost Bus",2025,7.1,"Drama","#0a0a0a"],
+  ["Merrily We Roll Along",2025,7.4,"Musical","#0a0a0a"],
+  ["KPop Demon Hunters",2025,6.5,"Action","#0a0a1a"],
+  ["If I Had Legs I'd Kick You",2025,7.3,"Drama","#0a0808"],
+  ["Blue Moon",2025,7.5,"Musical","#0a0818"],
+  ["The Room Next Door",2025,7.4,"Drama","#0a0a0a"],
+  ["Nouvelle Vague",2025,7.2,"Comedy","#080814"],
+
+  // ─── ADDITIONAL CLASSICS ───
+  ["Sunset Boulevard",1950,8.4,"Drama","#080808"],
+  ["Some Like It Hot",1959,8.2,"Comedy","#0a0a0a"],
+  ["Singin' in the Rain",1952,8.3,"Musical","#0a0a14"],
+  ["Modern Times",1936,8.1,"Comedy","#080808"],
+  ["City Lights",1931,8.5,"Comedy","#080808"],
+  ["The Great Dictator",1940,8.4,"Comedy","#080808"],
+  ["North by Northwest",1959,8.3,"Thriller","#0a0a14"],
+  ["Double Indemnity",1944,8.3,"Crime","#080808"],
+  ["Notorious",1946,7.9,"Thriller","#080808"],
+  ["Strangers on a Train",1951,7.9,"Thriller","#080810"],
+  ["Dial M for Murder",1954,8.0,"Thriller","#080808"],
+  ["To Catch a Thief",1955,7.4,"Mystery","#0a0a1a"],
+  ["The African Queen",1951,7.7,"Adventure","#0a1a0a"],
+  ["Treasure of the Sierra Madre",1948,8.2,"Western","#1a0a00"],
+  ["The Maltese Falcon",1941,8.0,"Crime","#080808"],
+  ["The Philadelphia Story",1940,8.0,"Comedy","#080808"],
+  ["It's a Wonderful Life",1946,8.6,"Drama","#08080a"],
+  ["Mr. Smith Goes to Washington",1939,8.1,"Drama","#080808"],
+  ["The Grapes of Wrath",1940,8.0,"Drama","#0a0a00"],
+  ["All About Eve",1950,8.2,"Drama","#080808"],
+  ["On the Waterfront",1954,8.1,"Crime","#08080a"],
+  ["The Bridge on the River Kwai",1957,8.2,"War","#0a0800"],
+  ["Ben-Hur",1959,8.1,"Action","#0a0800"],
+  ["Lawrence of Arabia",1962,8.5,"Adventure","#1a0a00"],
+  ["Doctor Zhivago",1965,7.9,"Drama","#08080a"],
+  ["The Sound of Music",1965,8.0,"Musical","#0a0a14"],
+  ["2001: A Space Odyssey",1968,8.3,"Sci-Fi","#080a1a"],
+  ["A Clockwork Orange",1971,8.3,"Crime","#080808"],
+  ["Barry Lyndon",1975,8.1,"Drama","#0a0808"],
+  ["Apocalypse Now",1979,8.4,"War","#1a0a00"],
+  ["Raging Bull",1980,8.2,"Drama","#080808"],
+  ["The Deer Hunter",1978,8.1,"War","#08080a"],
+  ["Amadeus",1984,8.4,"Drama","#08080a"],
+  ["Platoon",1986,8.1,"War","#0a1a0a"],
+  ["Dances with Wolves",1990,8.0,"Western","#0a1a0a"],
+  ["Unforgiven",1992,8.2,"Western","#1a0a00"],
+  ["Schindler's List",1993,9.0,"Drama","#101010"],
+  ["Saving Private Ryan",1998,8.6,"War","#1a2a1a"],
+  ["Gladiator",2000,8.5,"Action","#2a1a08"],
+  ["The Pianist",2002,8.5,"Drama","#080808"],
+  ["The Last Emperor",1987,7.7,"Drama","#0a0a14"],
+  ["Gandhi",1982,8.0,"Drama","#0a0a0a"],
+
+  // ─── ADDITIONAL MOVIES (50 more) ───
+  ["The Breakfast Club",1985,7.8,"Comedy","#0a0a14"],
+  ["Sixteen Candles",1984,7.1,"Comedy","#0a0a14"],
+  ["Pretty in Pink",1986,6.8,"Comedy","#1a0a14"],
+  ["Say Anything",1989,7.3,"Comedy","#0a0a14"],
+  ["When Harry Met Sally",1989,7.6,"Comedy","#0a0a14"],
+  ["Sleepless in Seattle",1993,6.8,"Comedy","#0a0a14"],
+  ["You've Got Mail",1998,6.7,"Comedy","#0a0a14"],
+  ["Notting Hill",1999,7.2,"Comedy","#1a0a0a"],
+  ["Love Actually",2003,7.6,"Comedy","#0a0a14"],
+  ["The Holiday",2006,6.9,"Comedy","#0a0a14"],
+  ["Jerry Maguire",1996,7.3,"Drama","#0a0a14"],
+  ["As Good as It Gets",1997,7.7,"Comedy","#0a0a14"],
+  ["Lost in Translation",2003,7.7,"Drama","#1a0a14"],
+  ["Eternal Sunshine",2004,8.3,"Drama","#0a0a1a"],
+  ["Her",2013,8.0,"Sci-Fi","#1a0a14"],
+  ["Paper Moon",1973,8.1,"Comedy","#0a0a08"],
+  ["Harold and Maude",1971,7.9,"Comedy","#0a0a14"],
+  ["Being There",1979,8.0,"Comedy","#0a0a14"],
+  ["Dr. Strangelove",1964,8.4,"Comedy","#08080a"],
+  ["M*A*S*H",1970,7.5,"Comedy","#0a0a00"],
+  ["The Apartment",1960,8.3,"Comedy","#080808"],
+  ["Some Like It Hot",1959,8.2,"Comedy","#0a0a0a"],
+  ["His Girl Friday",1940,7.9,"Comedy","#080808"],
+  ["Bringing Up Baby",1938,7.8,"Comedy","#080808"],
+  ["Arsenic and Old Lace",1944,8.0,"Comedy","#080808"],
+  ["The Philadelphia Story",1940,8.0,"Comedy","#080808"],
+  ["The Thin Man",1934,8.0,"Comedy","#080808"],
+  ["The Sting",1973,8.3,"Comedy","#0a0a14"],
+  ["Butch Cassidy and the Sundance Kid",1969,8.0,"Western","#1a0a00"],
+  ["The Wild Bunch",1969,8.2,"Western","#1a0a00"],
+  ["High Noon",1952,8.0,"Western","#080808"],
+  ["The Searchers",1956,8.0,"Western","#0a0a00"],
+  ["Stagecoach",1939,7.9,"Western","#080808"],
+  ["Shane",1953,7.7,"Western","#080808"],
+  ["The Man Who Shot Liberty Valance",1962,8.1,"Western","#080808"],
+  ["Rio Bravo",1959,8.0,"Western","#080808"],
+  ["The Magnificent Seven",1960,7.7,"Western","#0a0a00"],
+  ["Butch Cassidy",1969,8.0,"Western","#1a0a00"],
+  ["A Fistful of Dollars",1964,8.0,"Western","#1a0800"],
+  ["For a Few Dollars More",1965,8.3,"Western","#1a0800"],
+  ["The Outlaw Josey Wales",1976,7.9,"Western","#1a0800"],
+  ["Pale Rider",1985,7.3,"Western","#0a0800"],
+  ["Silverado",1985,7.2,"Western","#0a0800"],
+  ["Open Range",2003,7.4,"Western","#0a0800"],
+  ["The Assassination of Jesse James",2007,7.5,"Western","#0a0808"],
+  ["Slow West",2015,6.9,"Western","#0a0808"],
+  ["The Sisters Brothers",2018,6.9,"Western","#0a0808"],
+  ["Old Henry",2021,7.2,"Western","#0a0800"],
+  ["The Harder They Fall",2021,6.6,"Western","#0a0808"],
+  ["News of the World",2020,6.8,"Western","#0a0808"],
+  ["The Power of the Dog",2021,6.8,"Western","#0a1408"],
+  ["The Last of the Mohicans",1992,7.7,"Action","#0a1a0a"],
+  ["Master and Commander",2003,7.5,"Action","#0a1420"],
+  ["The Patriot",2000,7.2,"Action","#0a0a00"],
+  ["King Arthur",2004,6.3,"Action","#0a0808"],
+  ["Robin Hood: Prince of Thieves",1991,6.9,"Action","#0a0a00"],
+  ["Braveheart",1995,8.3,"Action","#1a1a0a"],
+  ["300",2006,7.6,"Action","#080800"],
+  ["Troy",2004,7.3,"Action","#0a0800"],
+  ["Gladiator",2000,8.5,"Action","#2a1a08"],
+  ["Centurion",2010,6.3,"Action","#0a0800"],
+  ["The 13th Warrior",1999,6.6,"Action","#0a0800"],
+  ["Kingdom of Heaven",2005,7.2,"Action","#0a0800"],
+  ["The Last Samurai",2003,7.8,"Action","#0a0a08"],
+  ["Hero",2002,7.9,"Action","#0a080a"],
+  ["House of Flying Daggers",2004,7.5,"Action","#0a0814"],
+  ["Crouching Tiger, Hidden Dragon",2000,7.8,"Action","#0a0a14"],
+  ["Enter the Dragon",1973,7.6,"Action","#0a0a0a"],
+  ["Ip Man",2008,8.0,"Action","#0a0a0a"],
+  ["Ong-Bak",2003,7.1,"Action","#0a0800"],
+  ["The Raid: Redemption",2011,7.6,"Action","#080808"],
+  ["The Raid 2",2014,8.0,"Action","#080808"],
+  ["Dredd",2012,7.1,"Action","#08080a"],
+  ["The Book of Eli",2010,6.8,"Action","#0a0a00"],
+  ["I Am Legend",2007,7.2,"Sci-Fi","#0a0a0a"],
+  ["The Road",2009,7.2,"Drama","#0a0808"],
+  ["Snowpiercer",2013,7.1,"Sci-Fi","#080a14"],
+  ["Elysium",2013,6.6,"Sci-Fi","#08080f"],
+  ["Chappie",2015,6.8,"Sci-Fi","#080808"],
+  ["Upgrade",2018,7.5,"Sci-Fi","#08080f"],
+  ["Alita: Battle Angel",2019,7.3,"Sci-Fi","#0a0a18"],
+  ["Ready Player One",2018,7.4,"Sci-Fi","#0a0a18"],
+  ["Pacific Rim",2013,6.9,"Action","#0a0a18"]
+];
+
+// Remove exact dupes by title+year
+const seen = new Set();
+const UNIQUE_MOVIES = MOVIES.filter(m => {
+  const key = m[0]+'|'+m[1];
+  if(seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
+
+console.log(`Total unique movies: ${UNIQUE_MOVIES.length}`);
+
+// ─── ROWS ───
+const GENRE_MAP = {
+  'all':'All','action':'Action','drama':'Drama','sci-fi':'Sci-Fi',
+  'horror':'Horror','thriller':'Thriller','crime':'Crime',
+  'comedy':'Comedy','animation':'Animation','mystery':'Mystery'
+};
+
+const ROW_DEFS = [
+  { label:'Top Rated', icon:'★', filter: m => m[2] >= 9.0, badge:'top', cat:'all' },
+  { label:'New Releases 2025', icon:'●', filter: m => m[1] >= 2025, badge:'new', cat:'all' },
+  { label:'2024 Movies', icon:'▸', filter: m => m[1] == 2024 || m[1] == 2023, badge:'new', cat:'all' },
+  { label:'Action Packed', icon:'⚡', filter: m => m[3]=='Action', badge:'hot', cat:'action' },
+  { label:'Sci-Fi Wonders', icon:'◈', filter: m => m[3]=='Sci-Fi', badge:null, cat:'sci-fi' },
+  { label:'Mind-Bending Thrillers', icon:'◉', filter: m => m[3]=='Thriller', badge:null, cat:'thriller' },
+  { label:'Crime Stories', icon:'■', filter: m => m[3]=='Crime', badge:null, cat:'crime' },
+  { label:'Laugh Out Loud', icon:'ϟ', filter: m => m[3]=='Comedy', badge:null, cat:'comedy' },
+  { label:'Animation Magic', icon:'✦', filter: m => m[3]=='Animation', badge:null, cat:'animation' },
+  { label:'Classic Cinema', icon:'◆', filter: m => m[1] < 1980 && m[2] >= 8.0, badge:'classic', cat:'all' },
+];
+
+const main = document.getElementById('main');
+const statusMsg = document.getElementById('statusMsg');
+statusMsg.textContent = `${UNIQUE_MOVIES.length} movies loaded`;
+
+let currentFilter = 'all';
+
+function renderRows(filter) {
+  main.innerHTML = '';
+  const mov = UNIQUE_MOVIES.filter(m => filter==='all' || m[3].toLowerCase()===filter);
+
+  ROW_DEFS.forEach((row, ri) => {
+    const rowMovies = mov.filter(row.filter);
+    if(rowMovies.length < 3) return;
+
+    const section = document.createElement('div');
+    section.className = 'row-section';
+
+    const label = document.createElement('div');
+    label.className = 'row-label';
+    let h = '';
+    if(row.badge) h += `<span class="badge badge-${row.badge}">${row.badge==='top'?'Top':row.badge==='new'?'New':row.badge==='hot'?'Hot':'Classic'}</span>`;
+    h += `${row.icon || ''} ${row.label}`;
+    h += ` <span class="count">(${rowMovies.length})</span>`;
+    h += `<button class="arr-btn" onclick="scrollRow(this,'prev')">◀</button>`;
+    h += `<button class="arr-btn" onclick="scrollRow(this,'next')">▶</button>`;
+    label.innerHTML = h;
+    section.appendChild(label);
+
+    const scroll = document.createElement('div');
+    scroll.className = 'row-scroll';
+
+    rowMovies.forEach((movie, ci) => {
+      const [title, year, rating, genre, color] = movie;
+      const card = document.createElement('div');
+      card.className = 'card' + (ci === 0 && ri === 0 ? ' featured' : '');
+      const hue = (ri * 97 + ci * 53) % 360;
+      const svg = generatePoster(title, genre, color, hue);
+      card.innerHTML = `
+        <img src="${svg}" alt="${title}" loading="lazy">
+        ${ci < 3 ? `<div class="card-rank">${ci+1}</div>` : ''}
+        <div class="card-overlay">
+          <div class="card-title">${title}</div>
+          <div class="card-meta">
+            <span class="star">★</span>
+            <span class="rating">${rating}</span>
+            <span class="year">${year}</span>
+          </div>
+        </div>
+        <div class="card-hover-info">
+          <div class="play-btn">▶</div>
+          <div class="card-genre">${genre}</div>
+          <div class="user-rating">
+            <button class="star-btn" onclick="event.stopPropagation();rateMovie(this)">★</button>
+          </div>
+        </div>
+      `;
+      card.onclick = () => showModal(title, year, rating, genre, color, hue);
+      scroll.appendChild(card);
+    });
+
+    section.appendChild(scroll);
+    main.appendChild(section);
+  });
+}
+
+function scrollRow(btn, dir) {
+  const scroll = btn.closest('.row-section').querySelector('.row-scroll');
+  const amount = 300;
+  scroll.scrollBy({ left: dir==='next' ? amount : -amount, behavior:'smooth' });
+}
+
+function generatePoster(title, genre, bgColor, hue) {
+  const lines = wrapText(title, 16);
+  const textLines = lines.map((l,i) =>
+    `<text x="80" y="${128 + i*18}" text-anchor="middle" font-size="13" font-weight="800" fill="white" font-family="Georgia,serif" opacity="0.95">${l}</text>`
+  ).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="240" viewBox="0 0 160 240">
+    <defs><linearGradient id="g${hue}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${bgColor}"/><stop offset="100%" stop-color="hsl(${hue},30%,8%)"/></linearGradient><linearGradient id="o${hue}" x1="0%" y1="40%" x2="0%" y2="100%"><stop offset="0%" stop-color="transparent"/><stop offset="100%" stop-color="rgba(0,0,0,0.85)"/></linearGradient></defs>
+    <rect width="160" height="240" fill="url(#g${hue})"/>
+    <circle cx="130" cy="30" r="50" fill="hsl(${hue},40%,20%)" opacity="0.3"/>
+    <circle cx="20" cy="200" r="60" fill="hsl(${(hue+180)%360},30%,15%)" opacity="0.2"/>
+    <rect x="0" y="60" width="4" height="80" fill="hsl(${hue},70%,55%)" opacity="0.6"/>
+    <rect x="10" y="12" width="${genre.length*7+10}" height="18" rx="3" fill="hsl(${hue},60%,40%)" opacity="0.85"/>
+    <text x="15" y="24" font-size="9" font-weight="700" fill="white" font-family="Arial" letter-spacing="1">${genre.toUpperCase()}</text>
+    <rect width="160" height="240" fill="url(#o${hue})"/>
+    ${textLines}
+    <text x="80" y="${152}" text-anchor="middle" font-size="10" fill="hsl(${hue},60%,65%)" font-family="Arial">★ ${hue%5+7}.${(hue*7)%10}</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+function wrapText(text, max) {
+  const w = text.split(' '); const lines = []; let cur = '';
+  for(const c of w) {
+    if((cur+' '+c).trim().length <= max){ cur=(cur+' '+c).trim(); }
+    else { if(cur) lines.push(cur); cur=c; }
+  }
+  if(cur) lines.push(cur);
+  return lines.slice(0,3);
+}
+
+// ─── MODAL ───
+function showModal(title, year, rating, genre, color, hue) {
+  const content = document.getElementById('modalContent');
+  content.innerHTML = `
+    <div style="width:100%;height:200px;border-radius:10px;margin-bottom:20px;background:linear-gradient(135deg,${color},hsl(${hue},30%,12%));display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div style="text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:rgba(255,255,255,0.15);letter-spacing:4px;">CINEMA</div>
+        <div style="font-size:12px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;margin-top:4px;">${genre}</div>
+      </div>
+    </div>
+    <h2>${title}</h2>
+    <div class="meta">
+      <span>${year}</span>
+      <span class="big-star">★</span>
+      <span>${rating}</span>
+      <span style="text-transform:uppercase;color:var(--gold-dim);letter-spacing:1px;font-size:11px;">${genre}</span>
+    </div>
+    <p>${title} is a ${genre.toLowerCase()} film released in ${year} with an IMDb rating of ${rating}/10. Rate this movie below!</p>
+    <div class="rate-area">
+      ${[5,4,3,2,1].map(i => `<button class="star-r-btn" data-r="${i}" onclick="setRating(this,${i})">★</button>`).join('')}
+    </div>
+    <div id="rateMsg" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function setRating(btn, r) {
+  document.querySelectorAll('.star-r-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.r) <= r));
+  document.getElementById('rateMsg').textContent = `You rated this ★ ${r}/5`;
+}
+
+function rateMovie(btn) {
+  btn.classList.toggle('active');
+}
+
+// ─── YOUTUBE THUMBNAIL CLICKS ───
+document.querySelectorAll('.yt-thumb').forEach(el => {
+  el.onclick = () => {
+    window.open('https://www.youtube.com/watch?v=' + el.dataset.vid, '_blank');
+  };
+});
+
+// ─── CATEGORY TABS ───
+document.querySelectorAll('.cat-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.cat;
+    renderRows(currentFilter);
+  };
+});
+
+// ─── CLOSE MODAL ON OVERLAY CLICK ───
+document.getElementById('modalOverlay').onclick = (e) => {
+  if(e.target === document.getElementById('modalOverlay')) closeModal();
+};
+
+// ─── INJECT YOUTUBE PLAYER ON LOAD FOR RELIABLE AUTOPLAY ───
+window.addEventListener("load", () => {
+  const container = document.getElementById("ytVidPlayer");
+  // Try minimal embed first - bare autoplay+mute, no extra params
+  container.innerHTML += `
+    <iframe
+      src="https://www.youtube.com/embed/Iikttcr0DTo?autoplay=1&amp;mute=1"
+      allow="autoplay; fullscreen"
+      allowfullscreen>
+    </iframe>
+  `;
+});
+
+// ─── INIT ───
+renderRows('all');
+</script>
+</body>
+</html>
