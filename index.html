@@ -176,8 +176,28 @@
   .modal .rate-area:not(:hover) button.active ~ button,
   .modal .rate-area:not(:hover) button.active{color:var(--gold);}
 
-  /* FOOTER note */
-  .status-msg{
+/* YouTube Background Player - always playing */
+  #ytPlayerContainer{
+    position:fixed;bottom:16px;right:16px;width:200px;height:113px;
+    border-radius:8px;overflow:hidden;z-index:200;
+    box-shadow:0 8px 32px rgba(0,0,0,0.7);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  #ytPlayerContainer iframe{width:100%;height:100%;border:none;pointer-events:none;}
+  #ytPlayerContainer .yt-label{
+    position:absolute;bottom:4px;left:6px;
+    font-size:7px;color:rgba(255,255,255,0.4);letter-spacing:0.5px;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);pointer-events:none;
+  }
+  #ytPlayerContainer .yt-badge{
+    position:absolute;top:4px;right:4px;
+    background:rgba(255,0,0,0.85);color:#fff;
+    font-size:7px;padding:1px 5px;border-radius:3px;
+    letter-spacing:0.5px;pointer-events:none;
+  }
+
+/* STATUS MSG */
+.status-msg{
     position:fixed;bottom:20px;right:32px;
     font-size:11px;color:rgba(255,255,255,0.2);
     z-index:1;pointer-events:none;
@@ -208,6 +228,9 @@
   <button class="cat-tab" data-cat="war">War</button>
   <button class="cat-tab" data-cat="musical">Musical</button>
 </div>
+
+<!-- YouTube Player - injected once, never touched by category changes -->
+<div id="ytPlayerContainer"></div>
 
 <main id="main"></main>
 <div class="status-msg" id="statusMsg"></div>
@@ -1034,6 +1057,20 @@ document.querySelectorAll('.cat-tab').forEach(tab => {
     currentFilter = tab.dataset.cat;
     render();
   };
+});
+
+// ─── INIT YOUTUBE BACKGROUND PLAYER (fires once, never stops) ───
+window.addEventListener('load', () => {
+  document.getElementById('ytPlayerContainer').innerHTML = `
+    <iframe
+      src="https://www.youtube.com/embed/Iikttcr0DTo?autoplay=1&mute=1&loop=1&playlist=Iikttcr0DTo"
+      allow="autoplay; fullscreen"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+    <div class="yt-badge">▶ AUTO</div>
+    <div class="yt-label">@gptoktha</div>
+  `;
 });
 
 // ─── INIT ───
