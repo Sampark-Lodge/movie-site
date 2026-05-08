@@ -86,14 +86,7 @@
     font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
     color:var(--text);margin-bottom:12px;
   }
-  .row-track-wrap{position:relative;}
-  .row-track-wrap::before,
-  .row-track-wrap::after{
-    content:'';position:absolute;top:0;bottom:8px;width:48px;z-index:5;
-    pointer-events:none;
-  }
-  .row-track-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent);z-index:5;}
-  .row-track-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent);z-index:5;}
+  .row-track-wrap{position:relative;padding-right:48px;}
   .row-track{
     display:flex;gap:var(--col-gap);
     overflow-x:auto;overflow-y:hidden;
@@ -129,7 +122,37 @@
   .card-rating .star{color:var(--gold);font-size:10px;}
   .card-rating span{font-size:11px;font-weight:700;color:var(--gold);}
 
-  /* MODAL */
+  /* CARD - play button overlay */
+  .card{position:relative;}
+  .card .play-btn-overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity 0.2s;cursor:pointer;
+    background:rgba(0,0,0,0.3);
+  }
+  .card:hover .play-btn-overlay{opacity:1;}
+  .card .play-btn-overlay .play-circle{
+    width:48px;height:48px;border-radius:50%;
+    background:var(--gold);display:flex;align-items:center;justify-content:center;
+    font-size:20px;color:#000;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    transition:transform 0.2s;
+  }
+  .card .play-btn-overlay:hover .play-circle{transform:scale(1.15);}
+  .row{position:relative;}
+  .row-scroll-btn{
+    position:absolute;right:0;top:50%;transform:translateY(-50%);
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(10,10,15,0.85);border:1px solid rgba(255,255,255,0.12);
+    color:var(--text);font-size:16px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:10;opacity:0;transition:opacity 0.2s,transform 0.2s;
+    backdrop-filter:blur(4px);
+  }
+  .row:hover .row-scroll-btn{opacity:1;}
+  .row-scroll-btn:hover{background:var(--gold);color:#000;border-color:var(--gold);transform:translateY(-50%) scale(1.1);}
+  .row-scroll-btn.left{right:auto;left:0;}
+  .row-scroll-btn::after{content:'›';font-size:20px;font-weight:700;}
+  .row-scroll-btn.left::after{content:'‹';}
   .modal-overlay{
     position:fixed;inset:0;z-index:200;
     background:rgba(0,0,0,0.85);
@@ -244,121 +267,165 @@
 </div>
 
 <script>
-// ======================== 500+ MOVIES DATABASE ========================
+// ======================== 560+ MOVIES DATABASE ========================
+// [title, year, rating, genre, color, imdbId]
 const MOVIES = [
-  // ─── TOP RATED ALL TIME (Classics & Modern Masterpieces) ───
-  ["The Shawshank Redemption",1994,9.3,"Drama","#1c1208"],
-  ["The Godfather",1972,9.2,"Crime","#120808"],
-  ["The Dark Knight",2008,9.0,"Action","#08080f"],
-  ["The Godfather Part II",1974,9.0,"Crime","#100808"],
-  ["12 Angry Men",1957,9.0,"Drama","#181410"],
-  ["Schindler's List",1993,9.0,"Drama","#101010"],
-  ["The Lord of the Rings: The Return of the King",2003,9.0,"Action","#1a1a0a"],
-  ["Pulp Fiction",1994,8.9,"Crime","#201008"],
-  ["The Good, the Bad and the Ugly",1966,8.8,"Western","#2a1a08"],
-  ["Fight Club",1999,8.8,"Thriller","#180808"],
-  ["Forrest Gump",1994,8.8,"Drama","#1a2a1a"],
-  ["Inception",2010,8.8,"Sci-Fi","#080818"],
-  ["The Lord of the Rings: The Fellowship of the Ring",2001,8.8,"Action","#0a1a0a"],
-  ["Star Wars: Episode V - The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f"],
-  ["The Matrix",1999,8.7,"Sci-Fi","#081408"],
-  ["Interstellar",2014,8.7,"Sci-Fi","#080818"],
-  ["Goodfellas",1990,8.7,"Crime","#100808"],
-  ["One Flew Over the Cuckoo's Nest",1975,8.7,"Drama","#1a1a1a"],
-  ["Se7en",1995,8.6,"Thriller","#140a0a"],
-  ["Seven Samurai",1954,8.6,"Action","#1a1a0a"],
-  ["The Silence of the Lambs",1991,8.6,"Thriller","#0a140a"],
-  ["Saving Private Ryan",1998,8.6,"War","#1a2a1a"],
-  ["City of God",2002,8.6,"Crime","#2a1a0a"],
-  ["Spirited Away",2001,8.6,"Animation","#0a1a2a"],
-  ["The Green Mile",1999,8.6,"Drama","#0a1a0a"],
-  ["Life Is Beautiful",1997,8.6,"Drama","#1a0a0a"],
-  ["Parasite",2019,8.5,"Thriller","#0a0a0a"],
-  ["Gladiator",2000,8.5,"Action","#2a1a08"],
-  ["The Prestige",2006,8.5,"Mystery","#080810"],
-  ["The Departed",2006,8.5,"Crime","#1a0808"],
-  ["Whiplash",2014,8.5,"Drama","#080808"],
-  ["The Lion King",1994,8.5,"Animation","#2a1a0a"],
-  ["Back to the Future",1985,8.5,"Sci-Fi","#0a1a2a"],
-  ["Terminator 2: Judgment Day",1991,8.5,"Action","#080a0f"],
-  ["Django Unchained",2012,8.5,"Western","#2a0a0a"],
-  ["Casablanca",1942,8.5,"Drama","#080808"],
-  ["Rear Window",1954,8.5,"Mystery","#0a0a14"],
-  ["Psycho",1960,8.5,"Horror","#0a0808"],
-  ["Citizen Kane",1941,8.3,"Drama","#080808"],
-  ["Alien",1979,8.5,"Horror","#080a08"],
-  ["Star Wars: Episode IV - A New Hope",1977,8.6,"Sci-Fi","#0a0a14"],
-  ["The Lord of the Rings: The Two Towers",2002,8.8,"Action","#0a1a0a"],
-  ["Leon: The Professional",1994,8.5,"Action","#1a0a0a"],
-  ["American History X",1998,8.5,"Drama","#0a0a0a"],
-  ["The Usual Suspects",1995,8.5,"Crime","#0a0a14"],
-  ["Vertigo",1958,8.3,"Mystery","#0a0a18"],
-  ["Apocalypse Now",1979,8.4,"War","#1a0a00"],
-  ["Taxi Driver",1976,8.2,"Drama","#1a0800"],
-  ["Braveheart",1995,8.3,"Action","#1a1a0a"],
-  ["The Pianist",2002,8.5,"Drama","#080808"],
-  ["Eternal Sunshine of the Spotless Mind",2004,8.3,"Drama","#0a0a1a"],
-  ["Memento",2000,8.4,"Mystery","#080808"],
-  ["Reservoir Dogs",1992,8.3,"Crime","#1a0808"],
-  ["Full Metal Jacket",1987,8.3,"War","#0a1008"],
-  ["Requiem for a Dream",2000,8.3,"Drama","#0a0808"],
-  ["Oldboy",2003,8.3,"Thriller","#0a0808"],
-  ["The Shining",1980,8.4,"Horror","#0a0800"],
-  ["Aliens",1986,8.4,"Action","#080a0f"],
-  ["Blade Runner",1982,8.1,"Sci-Fi","#080818"],
-  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818"],
-  ["Mad Max: Fury Road",2015,8.1,"Action","#2a0a00"],
-  ["Joker",2019,8.4,"Crime","#1a080a"],
-  ["Avengers: Endgame",2019,8.4,"Action","#080818"],
-  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f"],
-  ["Inglourious Basterds",2009,8.3,"War","#1a0a00"],
-  ["The Wolf of Wall Street",2013,8.2,"Comedy","#1a1a0a"],
-  ["Dunkirk",2017,7.8,"War","#0a1214"],
-  ["A Beautiful Mind",2001,8.2,"Drama","#0a1a1a"],
-  ["The Sixth Sense",1999,8.1,"Thriller","#0a0808"],
-  ["Finding Nemo",2003,8.1,"Animation","#0a1428"],
-  ["Up",2009,8.3,"Animation","#1a1a2a"],
-  ["Toy Story",1995,8.3,"Animation","#1a1a2a"],
-  ["Toy Story 3",2010,8.3,"Animation","#1a1a2a"],
-  ["WALL-E",2008,8.4,"Animation","#0a0a18"],
-  ["Inside Out",2015,8.1,"Animation","#0a2a2a"],
-  ["Coco",2017,8.4,"Animation","#2a1808"],
-  ["Ratatouille",2007,8.0,"Animation","#1a1a18"],
-  ["Howl's Moving Castle",2004,8.2,"Animation","#0a1a2a"],
-  ["Princess Mononoke",1997,8.4,"Animation","#0a1a0a"],
-  ["My Neighbor Totoro",1988,8.2,"Animation","#0a2a1a"],
-  ["Grave of the Fireflies",1988,8.5,"Animation","#1a0a08"],
-  ["Akira",1988,8.0,"Animation","#1a0808"],
-  ["The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f"],
-  ["Raiders of the Lost Ark",1981,8.4,"Action","#1a1a0a"],
-  ["Jurassic Park",1993,8.2,"Action","#0a1a0a"],
-  ["E.T. the Extra-Terrestrial",1982,7.9,"Sci-Fi","#0a0a1a"],
-  ["Indiana Jones and the Last Crusade",1989,8.2,"Action","#1a1a0a"],
-  ["Die Hard",1988,8.2,"Action","#0a0a0f"],
-  ["The Terminator",1984,8.0,"Action","#080a0f"],
-  ["Predator",1987,7.8,"Action","#0a0a0a"],
-  ["Rocky",1976,8.1,"Drama","#1a0a00"],
-  ["Platoon",1986,8.1,"War","#0a1a0a"],
-  ["Good Will Hunting",1997,8.3,"Drama","#080808"],
-  ["The Truman Show",1998,8.2,"Drama","#0a1a1a"],
-  ["Rain Man",1988,8.0,"Drama","#0a0a0a"],
-  ["Catch Me If You Can",2002,8.1,"Crime","#0a0a14"],
-  ["The Grand Budapest Hotel",2014,8.1,"Comedy","#2a1a1a"],
-  ["There Will Be Blood",2007,8.2,"Drama","#1a0a08"],
-  ["No Country for Old Men",2007,8.2,"Thriller","#1a1208"],
-  ["Fargo",1996,8.1,"Crime","#0a0a0f"],
-  ["Gone Girl",2014,8.1,"Thriller","#0a0810"],
-  ["Prisoners",2013,8.1,"Thriller","#08080a"],
-  ["Sicario",2015,7.7,"Action","#1a0a00"],
+  // ─── TOP RATED ALL TIME ───
+  ["The Shawshank Redemption",1994,9.3,"Drama","#1c1208","tt0111161"],
+  ["The Godfather",1972,9.2,"Crime","#120808","tt0068646"],
+  ["The Dark Knight",2008,9.0,"Action","#08080f","tt0468569"],
+  ["The Godfather Part II",1974,9.0,"Crime","#100808","tt0071562"],
+  ["12 Angry Men",1957,9.0,"Drama","#181410","tt0050083"],
+  ["Schindler's List",1993,9.0,"Drama","#101010","tt0108052"],
+  ["The Lord of the Rings: The Return of the King",2003,9.0,"Action","#1a1a0a","tt0167260"],
+  ["Pulp Fiction",1994,8.9,"Crime","#201008","tt0110912"],
+  ["The Good, the Bad and the Ugly",1966,8.8,"Western","#2a1a08","tt0060196"],
+  ["Fight Club",1999,8.8,"Thriller","#180808","tt0137523"],
+  ["Forrest Gump",1994,8.8,"Drama","#1a2a1a","tt0109830"],
+  ["Inception",2010,8.8,"Sci-Fi","#080818","tt1375666"],
+  ["The Lord of the Rings: The Fellowship of the Ring",2001,8.8,"Action","#0a1a0a","tt0120737"],
+  ["Star Wars: Episode V - The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f","tt0080684"],
+  ["The Matrix",1999,8.7,"Sci-Fi","#081408","tt0133093"],
+  ["Interstellar",2014,8.7,"Sci-Fi","#080818","tt0816692"],
+  ["Goodfellas",1990,8.7,"Crime","#100808","tt0099685"],
+  ["One Flew Over the Cuckoo's Nest",1975,8.7,"Drama","#1a1a1a","tt0073486"],
+  ["Se7en",1995,8.6,"Thriller","#140a0a","tt0114369"],
+  ["Seven Samurai",1954,8.6,"Action","#1a1a0a","tt0047478"],
+  ["The Silence of the Lambs",1991,8.6,"Thriller","#0a140a","tt0102926"],
+  ["Saving Private Ryan",1998,8.6,"War","#1a2a1a","tt0120815"],
+  ["City of God",2002,8.6,"Crime","#2a1a0a","tt0317248"],
+  ["Spirited Away",2001,8.6,"Animation","#0a1a2a","tt0245429"],
+  ["The Green Mile",1999,8.6,"Drama","#0a1a0a","tt0120689"],
+  ["Life Is Beautiful",1997,8.6,"Drama","#1a0a0a","tt0118799"],
+  ["Parasite",2019,8.5,"Thriller","#0a0a0a","tt6751668"],
+  ["Gladiator",2000,8.5,"Action","#2a1a08","tt0172495"],
+  ["The Prestige",2006,8.5,"Mystery","#080810","tt0482571"],
+  ["The Departed",2006,8.5,"Crime","#1a0808","tt0407887"],
+  ["Whiplash",2014,8.5,"Drama","#080808","tt2582802"],
+  ["The Lion King",1994,8.5,"Animation","#2a1a0a","tt0110357"],
+  ["Back to the Future",1985,8.5,"Sci-Fi","#0a1a2a","tt0088767"],
+  ["Terminator 2: Judgment Day",1991,8.5,"Action","#080a0f","tt0103064"],
+  ["Django Unchained",2012,8.5,"Western","#2a0a0a","tt1853728"],
+  ["Casablanca",1942,8.5,"Drama","#080808","tt0034583"],
+  ["Rear Window",1954,8.5,"Mystery","#0a0a14","tt0047396"],
+  ["Psycho",1960,8.5,"Horror","#0a0808","tt0054215"],
+  ["Alien",1979,8.5,"Horror","#080a08","tt0078748"],
+  ["Star Wars: Episode IV - A New Hope",1977,8.6,"Sci-Fi","#0a0a14","tt0076759"],
+  ["The Lord of the Rings: The Two Towers",2002,8.8,"Action","#0a1a0a","tt0167261"],
+  ["Leon: The Professional",1994,8.5,"Action","#1a0a0a","tt0110413"],
+  ["American History X",1998,8.5,"Drama","#0a0a0a","tt0120586"],
+  ["The Usual Suspects",1995,8.5,"Crime","#0a0a14","tt0114814"],
+  ["Vertigo",1958,8.3,"Mystery","#0a0a18","tt0052357"],
+  ["Apocalypse Now",1979,8.4,"War","#1a0a00","tt0078788"],
+  ["Taxi Driver",1976,8.2,"Drama","#1a0800","tt0075314"],
+  ["Braveheart",1995,8.3,"Action","#1a1a0a","tt0112573"],
+  ["The Pianist",2002,8.5,"Drama","#080808","tt0253474"],
+  ["Eternal Sunshine of the Spotless Mind",2004,8.3,"Drama","#0a0a1a","tt0338013"],
+  ["Memento",2000,8.4,"Mystery","#080808","tt0209144"],
+  ["Reservoir Dogs",1992,8.3,"Crime","#1a0808","tt0105236"],
+  ["Full Metal Jacket",1987,8.3,"War","#0a1008","tt0093058"],
+  ["Requiem for a Dream",2000,8.3,"Drama","#0a0808","tt0182093"],
+  ["Oldboy",2003,8.3,"Thriller","#0a0808","tt0363249"],
+  ["The Shining",1980,8.4,"Horror","#0a0800","tt0081505"],
+  ["Aliens",1986,8.4,"Action","#080a0f","tt0090605"],
+  ["Blade Runner",1982,8.1,"Sci-Fi","#080818","tt0083658"],
+  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818","tt1853728"],
+  ["Mad Max: Fury Road",2015,8.1,"Action","#2a0a00","tt1392190"],
+  ["Joker",2019,8.4,"Crime","#1a080a","tt7282466"],
+  ["Avengers: Endgame",2019,8.4,"Action","#080818","tt4154796"],
+  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f","tt4154756"],
+  ["Inglourious Basterds",2009,8.3,"War","#1a0a00","tt0361748"],
+  ["The Wolf of Wall Street",2013,8.2,"Comedy","#1a1a0a","tt0991380"],
+  ["Dunkirk",2017,7.8,"War","#0a1214","tt5013056"],
+  ["A Beautiful Mind",2001,8.2,"Drama","#0a1a1a","tt0268978"],
+  ["The Sixth Sense",1999,8.1,"Thriller","#0a0808","tt0167404"],
+  ["Finding Nemo",2003,8.1,"Animation","#0a1428","tt0266543"],
+  ["Up",2009,8.3,"Animation","#1a1a2a","tt1049418"],
+  ["Toy Story",1995,8.3,"Animation","#1a1a2a","tt0114709"],
+  ["Toy Story 3",2010,8.3,"Animation","#1a1a2a","tt0435761"],
+  ["WALL-E",2008,8.4,"Animation","#0a0a18","tt1010858"],
+  ["Inside Out",2015,8.1,"Animation","#0a2a2a","tt2096673"],
+  ["Coco",2017,8.4,"Animation","#2a1808","tt2380307"],
+  ["The Truman Show",1998,8.2,"Drama","#0a1a1a","tt0120382"],
+  ["Rain Man",1988,8.0,"Drama","#0a0a0a","tt0095953"],
+  ["Catch Me If You Can",2002,8.1,"Crime","#0a0a14","tt0264464"],
+  ["The Grand Budapest Hotel",2014,8.1,"Comedy","#2a1a1a","tt2278388"],
+  ["There Will Be Blood",2007,8.2,"Drama","#1a0a08","tt0469494"],
+  ["No Country for Old Men",2007,8.2,"Thriller","#1a1208","tt0477348"],
+  ["Fargo",1996,8.1,"Crime","#0a0a0f","tt0116282"],
+  ["Gone Girl",2014,8.1,"Thriller","#0a0810","tt2267998"],
+  ["Prisoners",2013,8.1,"Thriller","#08080a","tt1392210"],
+  ["Sicario",2015,7.7,"Action","#1a0a00","tt3537884"],
+  ["The Departed",2006,8.5,"Crime","#1a0808","tt0407887"],
+  ["Ratatouille",2007,8.0,"Animation","#1a1a18","tt0382932"],
+  ["Howl's Moving Castle",2004,8.2,"Animation","#0a1a2a","tt0347149"],
+  ["Princess Mononoke",1997,8.4,"Animation","#0a1a0a","tt0119698"],
+  ["My Neighbor Totoro",1988,8.2,"Animation","#0a2a1a","tt0096283"],
+  ["Grave of the Fireflies",1988,8.5,"Animation","#1a0a08","tt0095327"],
+  ["Akira",1988,8.0,"Animation","#1a0808","tt0094625"],
+  ["The Empire Strikes Back",1980,8.7,"Sci-Fi","#08080f","tt0080684"],
+  ["Raiders of the Lost Ark",1981,8.4,"Action","#1a1a0a","tt0082971"],
+  ["Jurassic Park",1993,8.2,"Action","#0a1a0a","tt0107290"],
+  ["E.T. the Extra-Terrestrial",1982,7.9,"Sci-Fi","#0a0a1a","tt0083866"],
+  ["Indiana Jones and the Last Crusade",1989,8.2,"Action","#1a1a0a","tt0097576"],
+  ["Die Hard",1988,8.2,"Action","#0a0a0f","tt0095016"],
+  ["The Terminator",1984,8.0,"Action","#080a0f","tt0088247"],
+  ["Predator",1987,7.8,"Action","#0a0a0a","tt0093773"],
+  ["Rocky",1976,8.1,"Drama","#1a0a00","tt0075148"],
+  ["Platoon",1986,8.1,"War","#0a1a0a","tt0091853"],
+  ["Good Will Hunting",1997,8.3,"Drama","#080808","tt0119217"],
+  ["The Truman Show",1998,8.2,"Drama","#0a1a1a","tt0120382"],
+  ["Rain Man",1988,8.0,"Drama","#0a0a0a","tt0095953"],
+  ["Catch Me If You Can",2002,8.1,"Crime","#0a0a14","tt0264464"],
+  ["The Grand Budapest Hotel",2014,8.1,"Comedy","#2a1a1a","tt2278388"],
+  ["There Will Be Blood",2007,8.2,"Drama","#1a0a08","tt0469494"],
+  ["No Country for Old Men",2007,8.2,"Thriller","#1a1208","tt0477348"],
+  ["Fargo",1996,8.1,"Crime","#0a0a0f","tt0116282"],
+  ["Gone Girl",2014,8.1,"Thriller","#0a0810","tt2267998"],
+  ["Prisoners",2013,8.1,"Thriller","#08080a","tt1392214"],
+  ["Sicario",2015,7.7,"Action","#1a0a00","tt3397884"],
 
-  // ─── 2024 MOVIES ───
-  ["Dune: Part Two",2024,8.6,"Sci-Fi","#1a2a4a"],
-  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a"],
-  ["The Brutalist",2024,7.8,"Drama","#1a1a1a"],
-  ["Furiosa: A Mad Max Saga",2024,7.4,"Action","#3a1a0a"],
-  ["Alien: Romulus",2024,7.3,"Horror","#0a1a0a"],
-  ["Conclave",2024,7.5,"Thriller","#1a1528"],
-  ["Deadpool & Wolverine",2024,7.9,"Action","#280808"],
+// ─── 2024 MOVIES ───
+  ["Dune: Part Two",2024,8.6,"Sci-Fi","#1a2a4a","tt15239678"],
+  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a","tt15398776"],
+  ["The Brutalist",2024,7.8,"Drama","#1a1a1a","tt8999762"],
+  ["Furiosa: A Mad Max Saga",2024,7.4,"Action","#3a1a0a","tt12037194"],
+  ["Alien: Romulus",2024,7.3,"Horror","#0a1a0a","tt18412256"],
+  ["Conclave",2024,7.5,"Thriller","#1a1528","tt20215234"],
+  ["Deadpool & Wolverine",2024,7.9,"Action","#280808","tt15333674"],
+  ["The Substance",2024,7.3,"Horror","#200810","tt17526714"],
+  ["Anora",2024,7.4,"Comedy","#1a1a1a","tt28607951"],
+  ["Inside Out 2",2024,7.8,"Animation","#0a2a2a","tt22022452"],
+  ["The Wild Robot",2024,8.2,"Animation","#0a2a1a","tt29623480"],
+  ["Dune: Part Two",2024,8.6,"Sci-Fi","#1a2a4a","tt15239678"],
+  ["Challengers",2024,7.6,"Drama","#2a2a0a","tt16426418"],
+  ["Civil War",2024,7.1,"Action","#1a0a0a","tt17279496"],
+  ["Twisters",2024,7.2,"Action","#0a1428","tt12584954"],
+  ["Longlegs",2024,5.8,"Horror","#0a0a14","tt15809648"],
+  ["A Quiet Place: Day One",2024,6.3,"Horror","#14140a","tt13433802"],
+  ["Kingdom of the Planet of the Apes",2024,6.8,"Sci-Fi","#0a2a0a","tt11389872"],
+  ["Godzilla x Kong: The New Empire",2024,6.0,"Action","#0a1a14","tt18938708"],
+  ["The Fall Guy",2024,6.8,"Action","#1a0a0a","tt1684562"],
+  ["Beetlejuice Beetlejuice",2024,6.6,"Comedy","#1a0a1a","tt2049403"],
+  ["Wicked",2024,7.3,"Fantasy","#1a0a2a","tt1262426"],
+  ["Nosferatu",2024,7.1,"Horror","#080808","tt5040012"],
+  ["Gladiator II",2024,6.5,"Action","#2a1808","tt9218128"],
+  ["Heretic",2024,7.1,"Horror","#0e0e18","tt28015403"],
+  ["Sing Sing",2024,7.6,"Drama","#101010","tt28479262"],
+  ["A Real Pain",2024,7.0,"Drama","#1a1a1a","tt21823606"],
+  ["The Bikeriders",2024,7.0,"Crime","#1a0a00","tt10370486"],
+  ["Blink Twice",2024,6.9,"Mystery","#140a20","tt14858658"],
+  ["Smile 2",2024,6.7,"Horror","#0a0808","tt29268110"],
+  ["Trap",2024,6.8,"Thriller","#200a14","tt26753003"],
+  ["Borderlands",2024,3.0,"Action","#1a2a0a","tt4978420"],
+  ["Ghostbusters: Frozen Empire",2024,6.2,"Comedy","#1a1a08","tt21235248"],
+  ["Kung Fu Panda 4",2024,6.3,"Animation","#1a1a0a","tt21692408"],
+  ["Despicable Me 4",2024,6.2,"Animation","#0a1a2a","tt7510222"],
+  ["Moana 2",2024,6.3,"Animation","#0a1a28","tt13622970"],
+  ["Mufasa: The Lion King",2024,6.6,"Animation","#2a1a0a","tt23864844"],
+  ["Sonic the Hedgehog 3",2024,7.1,"Action","#0a0a2a","tt24596200"],
+  ["Venom: The Last Dance",2024,6.0,"Action","#0a0808","tt27853382"],
+  ["Deadpool & Wolverine",2024,7.9,"Action","#280808","tt15333674"],
   ["The Substance",2024,7.3,"Horror","#200810"],
   ["Anora",2024,7.4,"Comedy","#1a1a1a"],
   ["Inside Out 2",2024,7.8,"Animation","#0a2a2a"],
@@ -391,77 +458,73 @@ const MOVIES = [
   ["Mufasa: The Lion King",2024,6.6,"Animation","#2a1a0a"],
   ["Sonic the Hedgehog 3",2024,7.1,"Action","#0a0a2a"],
   ["Venom: The Last Dance",2024,6.0,"Action","#0a0808"],
-  ["Deadpool & Wolverine",2024,7.9,"Action","#280808"],
+  ["Deadpool & Wolverine",2024,7.9,"Action","#280808","tt15333674"],
 
   // ─── 2023 MOVIES ───
-  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a"],
-  ["Barbie",2023,6.9,"Comedy","#2a0a2a"],
-  ["Killers of the Flower Moon",2023,7.6,"Drama","#1a0a00"],
-  ["The Batman",2022,7.8,"Action","#080814"],
-  ["Everything Everywhere All at Once",2022,7.8,"Sci-Fi","#180818"],
-  ["Top Gun: Maverick",2022,8.2,"Action","#0a1420"],
-  ["The Whale",2022,7.7,"Drama","#1a1408"],
-  ["All Quiet on the Western Front",2022,7.8,"War","#08080a"],
-  ["The Banshees of Inisherin",2022,7.7,"Comedy","#1a1a08"],
-  ["Elvis",2022,7.3,"Drama","#201008"],
-  ["Avatar: The Way of Water",2022,7.5,"Sci-Fi","#0a1a2a"],
-  ["Bullet Train",2022,7.3,"Action","#1a0808"],
-  ["Nope",2022,6.8,"Horror","#0a0a18"],
-  ["Glass Onion",2022,7.1,"Mystery","#0a1818"],
-  ["The Menu",2022,7.2,"Thriller","#080a10"],
-  ["Barbarian",2022,7.0,"Horror","#100a10"],
-  ["Prey",2022,7.1,"Action","#0a1a0a"],
-  ["The Northman",2022,7.1,"Action","#0a0808"],
-  ["The Fabelmans",2022,7.5,"Drama","#0a0a14"],
-  ["TAR",2022,7.4,"Drama","#080808"],
-  ["Decision to Leave",2022,7.3,"Mystery","#0a0a18"],
-  ["Marcel the Shell with Shoes On",2022,7.9,"Animation","#1a1a2a"],
-  ["Pinocchio",2022,7.6,"Animation","#1a0a08"],
-  ["Turning Red",2022,7.0,"Animation","#2a0a0a"],
-  ["The Woman King",2022,6.9,"Action","#1a0a00"],
+  ["Oppenheimer",2023,8.9,"Drama","#2a1a0a","tt15398776"],
+  ["Barbie",2023,6.9,"Comedy","#2a0a2a","tt1517268"],
+  ["Killers of the Flower Moon",2023,7.6,"Drama","#1a0a00","tt5537002"],
+  ["The Batman",2022,7.8,"Action","#080814","tt1872190"],
+  ["Everything Everywhere All at Once",2022,7.8,"Sci-Fi","#180818","tt6710474"],
+  ["Top Gun: Maverick",2022,8.2,"Action","#0a1420","tt1745960"],
+  ["The Whale",2022,7.7,"Drama","#1a1408","tt13833688"],
+  ["All Quiet on the Western Front",2022,7.8,"War","#08080a","tt13238346"],
+  ["The Banshees of Inisherin",2022,7.7,"Comedy","#1a1a08","tt15339576"],
+  ["Elvis",2022,7.3,"Drama","#201008","tt3598326"],
+  ["Avatar: The Way of Water",2022,7.5,"Sci-Fi","#0a1a2a","tt1630029"],
+  ["Bullet Train",2022,7.3,"Action","#1a0808","tt12533682"],
+  ["Nope",2022,6.8,"Horror","#0a0a18","tt6723592"],
+  ["Glass Onion",2022,7.1,"Mystery","#0a1818","tt15832216"],
+  ["The Menu",2022,7.2,"Thriller","#080a10","tt10345166"],
+  ["Barbarian",2022,7.0,"Horror","#100a10","tt10519066"],
+  ["Prey",2022,7.1,"Action","#0a1a0a","tt11866324"],
+  ["The Northman",2022,7.1,"Action","#0a0808","tt11138512"],
+  ["The Fabelmans",2022,7.5,"Drama","#0a0a14","tt14208870"],
+  ["TAR",2022,7.4,"Drama","#080808","tt13731588"],
+  ["Decision to Leave",2022,7.3,"Mystery","#0a0a18","tt13373160"],
+  ["Marcel the Shell with Shoes On",2022,7.9,"Animation","#1a1a2a","tt13866930"],
+  ["Pinocchio",2022,7.6,"Animation","#1a0a08","tt8340172"],
+  ["Turning Red",2022,7.0,"Animation","#2a0a0a","tt8097030"],
+  ["The Woman King",2022,6.9,"Action","#1a0a00","tt11853016"],
 
   // ─── 2021 MOVIES ───
-  ["Dune",2021,8.0,"Sci-Fi","#1a2a3a"],
-  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a"],
-  ["The Power of the Dog",2021,6.8,"Western","#0a1408"],
-  ["Drive My Car",2021,7.5,"Drama","#0a0a0a"],
-  ["Licorice Pizza",2021,7.1,"Comedy","#2a1a08"],
-  ["A Quiet Place Part II",2021,7.2,"Horror","#0a0a0a"],
-  ["No Time to Die",2021,7.3,"Action","#0a0a0f"],
-  ["The French Dispatch",2021,7.1,"Comedy","#1a0a08"],
-  ["West Side Story",2021,7.1,"Musical","#1a0a14"],
-  ["Dune",2021,8.0,"Sci-Fi","#1a2a3a"],
-  ["The Green Knight",2021,6.6,"Fantasy","#0a1a08"],
-  ["The Last Duel",2021,7.4,"Action","#0a0808"],
-  ["Belfast",2021,7.2,"Drama","#0a0a0a"],
-  ["Soul",2020,8.0,"Animation","#0a1428"],
-  ["Encanto",2021,7.2,"Animation","#2a1a0a"],
-  ["Luca",2021,7.4,"Animation","#0a2a28"],
-  ["Raya and the Last Dragon",2021,7.3,"Animation","#0a1a2a"],
-  ["The Mitchells vs the Machines",2021,7.6,"Animation","#0a2a1a"],
-  ["Flee",2021,7.9,"Animation","#0a0a0a"],
+  ["Dune",2021,8.0,"Sci-Fi","#1a2a3a","tt15239678"],
+  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a","tt10872600"],
+  ["The Power of the Dog",2021,6.8,"Western","#0a1408","tt10380766"],
+  ["Drive My Car",2021,7.5,"Drama","#0a0a0a","tt14039508"],
+  ["Licorice Pizza",2021,7.1,"Comedy","#2a1a08","tt11271086"],
+  ["A Quiet Place Part II",2021,7.2,"Horror","#0a0a0a","tt5642926"],
+  ["No Time to Die",2021,7.3,"Action","#0a0a0f","tt2382320"],
+  ["The French Dispatch",2021,7.1,"Comedy","#1a0a08","tt8847712"],
+  ["West Side Story",2021,7.1,"Musical","#1a0a14","tt3581652"],
+  ["The Green Knight",2021,6.6,"Fantasy","#0a1a08","tt6396144"],
+  ["The Last Duel",2021,7.4,"Action","#0a0808","tt12207176"],
+  ["Belfast",2021,7.2,"Drama","#0a0a0a","tt13871038"],
+  ["Encanto",2021,7.2,"Animation","#2a1a0a","tt2953050"],
+  ["Luca",2021,7.4,"Animation","#0a2a28","tt12887566"],
+  ["Raya and the Last Dragon",2021,7.3,"Animation","#0a1a2a","tt5109280"],
+  ["The Mitchells vs the Machines",2021,7.6,"Animation","#0a2a1a","tt10514296"],
+  ["Flee",2021,7.9,"Animation","#0a0a0a","tt10328628"],
 
-  // ─── 2020 MOVIES ───
-  ["Parasite",2019,8.5,"Thriller","#0a0a0a"],
-  ["1917",2019,8.2,"War","#0a0a0a"],
-  ["Joker",2019,8.4,"Crime","#1a080a"],
-  ["Once Upon a Time in Hollywood",2019,7.6,"Comedy","#1a0a00"],
-  ["The Irishman",2019,7.8,"Crime","#0a0808"],
-  ["Marriage Story",2019,7.9,"Drama","#080808"],
-  ["Knives Out",2019,7.9,"Mystery","#180c08"],
-  ["Ford v Ferrari",2019,8.1,"Action","#1a0a00"],
-  ["Jojo Rabbit",2019,7.9,"Comedy","#1a1a0a"],
-  ["Uncut Gems",2019,7.4,"Thriller","#1a0a0a"],
-  ["Portrait of a Lady on Fire",2019,8.1,"Drama","#0a0a14"],
-  ["Midsommar",2019,7.1,"Horror","#18180a"],
-  ["Hereditary",2018,7.3,"Horror","#100808"],
-  ["A Star Is Born",2018,7.6,"Drama","#1a0808"],
-  ["BlacKkKlansman",2018,7.5,"Comedy","#0a0a0a"],
-  ["Roma",2018,7.7,"Drama","#080808"],
-  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Animation","#0a0a2a"],
-  ["Bohemian Rhapsody",2018,7.9,"Drama","#08080a"],
-  ["A Quiet Place",2018,7.5,"Horror","#0a0a0a"],
-  ["Get Out",2017,7.7,"Horror","#080808"],
+  // ─── 2019-2020 MOVIES ───
+  ["1917",2019,8.2,"War","#0a0a0a","tt8574924"],
+  ["Once Upon a Time in Hollywood",2019,7.6,"Comedy","#1a0a00","tt7131622"],
+  ["The Irishman",2019,7.8,"Crime","#0a0808","tt1302006"],
+  ["Marriage Story",2019,7.9,"Drama","#080808","tt8473854"],
+  ["Knives Out",2019,7.9,"Mystery","#180c08","tt89564"],
+  ["Ford v Ferrari",2019,8.1,"Action","#1a0a00","tt6839772"],
+  ["Jojo Rabbit",2019,7.9,"Comedy","#1a1a0a","tt8794380"],
+  ["Uncut Gems",2019,7.4,"Thriller","#1a0a0a","tt10163870"],
+  ["Portrait of a Lady on Fire",2019,8.1,"Drama","#0a0a14","tt9143704"],
+  ["Midsommar",2019,7.1,"Horror","#18180a","tt7844124"],
+  ["Hereditary",2018,7.3,"Horror","#100808","tt7752126"],
+  ["A Star Is Born",2018,7.6,"Drama","#1a0808","tt1517451"],
+  ["BlacKkKlansman",2018,7.5,"Comedy","#0a0a0a","tt7355462"],
+  ["Roma",2018,7.7,"Drama","#080808","tt6155172"],
+  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Animation","#0a0a2a","tt4633604"],
+  ["Bohemian Rhapsody",2018,7.9,"Drama","#08080a","tt7572644"],
+  ["A Quiet Place",2018,7.5,"Horror","#0a0a0a","tt6644200"],
+  ["Get Out",2017,7.7,"Horror","#080808","tt5052448"],
 
   // ─── CLASSIC HORROR ───
   ["The Shining",1980,8.4,"Horror","#0a0800"],
@@ -493,7 +556,7 @@ const MOVIES = [
   ["Let the Right One In",2008,7.9,"Horror","#080a14"],
 
   // ─── SCI-FI ───
-  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818"],
+  ["Blade Runner 2049",2017,8.0,"Sci-Fi","#0a0818","tt1856101"],
   ["Arrival",2016,7.9,"Sci-Fi","#0a0a18"],
   ["Ex Machina",2015,7.7,"Sci-Fi","#0a0a14"],
   ["Interstellar",2014,8.7,"Sci-Fi","#080818"],
@@ -520,15 +583,15 @@ const MOVIES = [
   ["John Wick: Chapter 2",2017,7.4,"Action","#080808"],
   ["John Wick: Chapter 3",2019,7.4,"Action","#080808"],
   ["John Wick: Chapter 4",2023,7.7,"Action","#080808"],
-  ["The Dark Knight Rises",2012,8.4,"Action","#08080f"],
-  ["Batman Begins",2005,8.2,"Action","#080814"],
-  ["The Batman",2022,7.8,"Action","#080814"],
-  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a"],
-  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Action","#0a0a2a"],
-  ["Spider-Man: Across the Spider-Verse",2023,8.6,"Action","#0a0a2a"],
-  ["Avengers: Endgame",2019,8.4,"Action","#080818"],
-  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f"],
-  ["Logan",2017,8.1,"Action","#080808"],
+  ["The Dark Knight Rises",2012,8.4,"Action","#08080f","tt1345836"],
+  ["Batman Begins",2005,8.2,"Action","#080814","tt0372784"],
+  ["The Batman",2022,7.8,"Action","#080814","tt1877830"],
+  ["Spider-Man: No Way Home",2021,8.2,"Action","#1a0a0a","tt10872600"],
+  ["Spider-Man: Into the Spider-Verse",2018,8.4,"Animation","#0a0a2a","tt4633694"],
+  ["Spider-Man: Across the Spider-Verse",2023,8.6,"Animation","#0a0a2a","tt9362930"],
+  ["Avengers: Endgame",2019,8.4,"Action","#080818","tt4154796"],
+  ["Avengers: Infinity War",2018,8.4,"Action","#0a0a0f","tt4154756"],
+  ["Logan",2017,8.1,"Action","#080808","tt3315342"],
   ["X-Men: Days of Future Past",2014,7.9,"Action","#080814"],
   ["Captain America: The Winter Soldier",2014,7.7,"Action","#08080f"],
   ["Mission: Impossible - Fallout",2018,7.7,"Action","#08080f"],
@@ -916,14 +979,18 @@ function render() {
     track.className = 'row-track';
 
     rowMovies.forEach((movie) => {
-      const [title, year, rating, genre, color] = movie;
+      const [title, year, rating, genre, color, imdbId] = movie;
       const hue = Math.floor(Math.random() * 360);
       const svg = generatePoster(title, genre, color, hue);
+      const playLink = imdbId ? `https://www.playimdb.com/title/${imdbId}/` : null;
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
         <img src="${svg}" alt="${title}" loading="lazy">
-        <div class="card-info">
+        <div class="play-btn-overlay" onclick="${playLink ? `window.open('${playLink}','_blank')` : ''}">
+          <div class="play-circle">▶</div>
+        </div>
+        <div class="card-info" onclick="showModal('${title.replace(/'/g,"\\'")}',${year},${rating},'${genre}','${color}',${hue})">
           <div class="card-title">${title}</div>
           <div class="card-rating">
             <span class="star">★</span>
@@ -931,12 +998,33 @@ function render() {
           </div>
         </div>
       `;
-      card.onclick = () => showModal(title, year, rating, genre, color, hue);
       track.appendChild(card);
     });
 
     trackWrap.appendChild(track);
+
+    // Left scroll button
+    const leftBtn = document.createElement('button');
+    leftBtn.className = 'row-scroll-btn left';
+    leftBtn.onclick = () => track.scrollBy({ left: -600, behavior: 'smooth' });
+    leftBtn.style.opacity = '0.3';
+    leftBtn.title = 'Scroll left';
+
+    // Right scroll button
+    const rightBtn = document.createElement('button');
+    rightBtn.className = 'row-scroll-btn';
+    rightBtn.onclick = () => track.scrollBy({ left: 600, behavior: 'smooth' });
+    rightBtn.title = 'Scroll right';
+
+    // Show/hide buttons based on scroll
+    track.addEventListener('scroll', () => {
+      leftBtn.style.opacity = track.scrollLeft > 20 ? '1' : '0.3';
+      rightBtn.style.opacity = track.scrollLeft < track.scrollWidth - track.clientWidth - 20 ? '1' : '0.3';
+    });
+
     section.appendChild(trackWrap);
+    section.appendChild(leftBtn);
+    section.appendChild(rightBtn);
     main.appendChild(section);
   });
 
